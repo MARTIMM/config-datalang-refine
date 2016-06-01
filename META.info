@@ -1,0 +1,15 @@
+{
+  "author": "Marcel Timmerman",
+  "authors": "Marcel Timmerman",
+  "depends": [
+    "Config::TOML"
+  ],
+  "description": "Refinements to the use of Config::TOML",
+  "license": "The Artistic License 2.0",
+  "name": "",
+  "perl": "6.c",
+  "provides": {
+  },
+  "source-url": "git://github.com/MARTIMM/.git",
+  "version": "0.0.1"
+}
