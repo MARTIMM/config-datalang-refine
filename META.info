@@ -2,14 +2,17 @@
   "author": "Marcel Timmerman",
   "authors": "Marcel Timmerman",
   "depends": [
-    "Config::TOML"
+    "Config::TOML",
+    "JSON::Fast",
+    "File::HomeDir"
   ],
   "description": "Refinements to the use of Config::TOML",
   "license": "The Artistic License 2.0",
-  "name": "",
+  "name": "Refine",
   "perl": "6.c",
   "provides": {
+    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6"
   },
-  "source-url": "git://github.com/MARTIMM/.git",
-  "version": "0.0.1"
+  "source-url": "git://github.com/MARTIMM/config-toml-refine.git",
+  "version": "0.0.2"
 }
