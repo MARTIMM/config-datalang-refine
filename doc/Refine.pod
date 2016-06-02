@@ -1,0 +1,139 @@
+#!/usr/bin/env perl6
+#
+use v6.c;
+
+# Running the pod file will create a pdf using wkhtmltopdf
+#
+my Str $pod = "$*PROGRAM";
+my Str $pdf = $pod;
+$pdf ~~ s/\. <-[.]>+ $/.pdf/;
+shell( "perl6 --doc=HTML '$pod' | wkhtmltopdf - '$pdf'");
+
+#-------------------------------------------------------------------------------
+
+=begin pod
+
+=begin Xhtml
+<style>
+  pre {
+    border-width:       2px;
+    border-style:       solid;
+    border-color:       #060;
+    padding:            10px 0 3px 10px;
+    color:              #060;
+    background-color:   #eaefea;
+    font-family:        FreeMono;
+  }
+  td {
+    vertical-align:     top;
+  }
+</style>
+=end Xhtml
+
+=TITLE class Config::TOML::Refine
+
+=SUBTITLE Refine use of TOML configuration
+
+  class Config::TOML::Refine { ... }
+
+
+=head1 Synopsis
+
+The following piece of code
+
+  use Config::TOML::Refine;
+
+  my Config::TOML::Refine $c .= new(:config-name<myConfig.toml>);
+
+  my Hash $hp1 = $c.refine(<options plugin1 test>);
+  my Hash $hp2 = $c.refine-filter(<options plugin1 test>);
+  my Array $ap3 = $c.refine-filter-str(<options plugin1 deploy>);
+  my Array $ap4 = $c.refine-filter-str(<options plugin2 deploy>);
+
+With the following config file in myConfig.toml
+
+  [options]
+    key1 = 'val1'
+    key1a = true
+
+  [options.plugin1]
+    key2 = 'val2'
+
+  [options.plugin1.test]
+    key1 = false
+    key2 = 'val3'
+
+  [options.plugin2.deploy]
+    key3 = 'val3'
+    key4 = [ 1, 2, 3, 4]
+
+
+Will get you the following as if the variables were set like
+
+  # All found values
+  $hp1 = ${:!key1, :key1a, :key2("val3")};
+
+  # False booleans filtered out
+  $hp2 = ${:key1a, :key2("val3")};
+
+  # Note that there is no deploy for plugin1
+  $ap3 = $["key1=val1", "key1a", "key2=val2"];
+
+  # Arrays become comma separated lists by default
+  $ap4 = $["key1=val1", "key1a", "key3=val3", "key4=1,2,3,4"]
+
+
+=head1 Description
+
+This class is used for getting configuration data in such a way that several
+levels are accumulated and returned in a single level Hash or Array.
+
+
+=head1 Attributes
+
+=head2 config
+
+Defined as
+
+  has Hash $.config;
+
+Stored TOML configuration. Can be retrieved directly from class.
+
+
+=head1 Methods
+
+=head2 new
+
+Defined as
+
+  submethod BUILD ( Str :$config-name, Bool :$merge = False)
+
+Reads TOML text from a file pointed to by $config-name. The file will first be
+searched for in the current directory. Then, if not found, tries to read the
+hidden variant (on unixes) which is the name with a dot ('.') prefixed to the file.
+If that fails too it tries yet another file located in the home directory of the
+user. At last the method throws an exception if no files are found.
+
+$merge is used to merge all the files together starting with the file in the users
+home directory if found. Then it adds or overwrites the options from the second
+file if found and finishing with the last file found. An exception will be thrown
+when the resulting config has no elements.
+
+Config::TOML throws also exceptions when a parse failure takes place.
+
+
+=head2 refine
+
+Defined as
+
+  method refine ( *@key-list --> Hash )
+
+Processes data in the config using the keys from the @key-list. The method
+returns a single level Hash.
+
+The process starts with taking the first key from
+the list and gathers all pairs ignoring pairs of which the value is a Hash.
+Then it descends in the config using the 
+
+
+=end pod
