@@ -53,4 +53,15 @@ The original config file can be retrieved of course.
 
 #Changelog
 
+* 0.3.0
+  * Use **:data-module** to select other modules to load other types of config files. Possible now are Config::TOML and JSON::Fast.
+
+* 0.2.0
+  * methods refine-filter(). refine-filter-str() added
+
+* 0.1.0
+  * setup using Config::TOML
+  * method new to read config files and **:merge**
+  * method refine to get key value pairs
+
 * 0.0.1 Start of the project

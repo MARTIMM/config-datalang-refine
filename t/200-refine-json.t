@@ -7,23 +7,23 @@ use Config::DataLang::Refine;
 spurt( '.myCfg.cfg', Q:to/EOOPT/);
   {
     "app": {
-      "workdir": '/var/tmp',
-      "text": 'abc def xyz',
+      "workdir": "/var/tmp",
+      "text": "abc def xyz",
 
       "p1": {
-        "workdir": '/tmp',
-        "host": 'example.com'
+        "workdir": "/tmp",
+        "host": "example.com"
       },
   
       "p2": {
-        "workdir": '~/p2',
+        "workdir": "~/p2",
         "tunnel": true,
         "vision": false
       }
     },
 
     "p2": {
-      "workdir": '~/p2',
+      "workdir": "~/p2",
       "times": [10,11,12],
       "tunnel": true
     }
@@ -36,25 +36,25 @@ spurt( '.myCfg.cfg', Q:to/EOOPT/);
 spurt( 'myCfg.cfg', Q:to/EOOPT/);
   {
     "app": {
-      "port": 2345
+      "port": 2345,
 
       "p1": {
-        "workdir": '/tmp'
+        "workdir": "/tmp"
       },
   
       "p2": {
-        "workdir": '~/p2',
+        "workdir": "~/p2",
         "tunnel": false,
         "vision": true
       }
     },
 
     "p2": {
-      "per5lib": [ 'lib', '.'],
+      "per5lib": [ "lib", "."],
       
       "env": {
-        "PATH": [ '/usr/bin', '/bin', '.'],
-        "perl6lib": [ 'lib', '.'],
+        "PATH": [ "/usr/bin", "/bin", "."],
+        "perl6lib": [ "lib", "."],
         "perl5lib": false
       }
     }
