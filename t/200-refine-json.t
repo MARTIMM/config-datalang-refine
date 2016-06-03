@@ -14,7 +14,7 @@ spurt( '.myCfg.cfg', Q:to/EOOPT/);
         "workdir": "/tmp",
         "host": "example.com"
       },
-  
+
       "p2": {
         "workdir": "~/p2",
         "tunnel": true,
@@ -41,7 +41,7 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
       "p1": {
         "workdir": "/tmp"
       },
-  
+
       "p2": {
         "workdir": "~/p2",
         "tunnel": false,
@@ -51,7 +51,7 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
 
     "p2": {
       "per5lib": [ "lib", "."],
-      
+
       "env": {
         "PATH": [ "/usr/bin", "/bin", "."],
         "perl6lib": [ "lib", "."],
