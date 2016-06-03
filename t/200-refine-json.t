@@ -13,44 +13,52 @@ spurt( '.myCfg.cfg', Q:to/EOOPT/);
       "p1": {
         "workdir": '/tmp',
         "host": 'example.com'
+      },
+  
+      "p2": {
+        "workdir": '~/p2',
+        "tunnel": true,
+        "vision": false
       }
     },
 
-  [p2]
-    workdir     = '~/p2'
-    times       = [10,11,12]
-    tunnel      = true
-
-  [app.p2]
-    workdir     = '~/p2'
-    tunnel      = true
-    vision      = false
+    "p2": {
+      "workdir": '~/p2',
+      "times": [10,11,12],
+      "tunnel": true
+    }
+  }
 
   EOOPT
 
 
 # Second config
 spurt( 'myCfg.cfg', Q:to/EOOPT/);
-  # App control
-  [app]
-    port        = 2345
+  {
+    "app": {
+      "port": 2345
 
-  # App control for plugin p1
-  [app.p1]
-    workdir     = '/tmp'
+      "p1": {
+        "workdir": '/tmp'
+      },
+  
+      "p2": {
+        "workdir": '~/p2',
+        "tunnel": false,
+        "vision": true
+      }
+    },
 
-  [app.p2]
-    workdir     = '~/p2'
-    tunnel      = false
-    vision      = true
-
-  [p2]
-    perl5lib    = [ 'lib', '.']
-
-  [p2.env]
-    PATH        = [ '/usr/bin', '/bin', '.']
-    perl6lib    = [ 'lib', '.']
-    perl5lib    = false
+    "p2": {
+      "per5lib": [ 'lib', '.'],
+      
+      "env": {
+        "PATH": [ '/usr/bin', '/bin', '.'],
+        "perl6lib": [ 'lib', '.'],
+        "perl5lib": false
+      }
+    }
+  }
 
   EOOPT
 
@@ -67,13 +75,16 @@ subtest {
     }
   }
 
-  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Config::DataLang::Refine $c .= new(
+    :config-name<myCfg.cfg>,
+    :data-module<JSON::Fast>
+  );
   ok $c.config<app><workdir>:!exists, 'no workdir';
   is $c.config<app><p1><workdir>, '/tmp', "workdir p1 $c.config()<app><p1><workdir>";
   ok $c.config<app><p1><host>:!exists, 'no host';
   is $c.config<app><p2><workdir>, '~/p2', "workdir p2 $c.config()<app><p2><workdir>";
 
-  $c .= new( :config-name<myCfg.cfg>, :merge);
+  $c .= new( :config-name<myCfg.cfg>, :merge, :data-module<JSON::Fast>);
   is $c.config<app><workdir>, '/var/tmp', "workdir app $c.config()<app><workdir>";
   is $c.config<app><p1><workdir>, '/tmp', "workdir p1 $c.config()<app><p1><workdir>";
   is $c.config<app><p1><host>, 'example.com', "host p1 $c.config()<app><p1><host>";
@@ -87,7 +98,10 @@ subtest {
 #-------------------------------------------------------------------------------
 subtest {
 
-  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Config::DataLang::Refine $c .= new(
+    :config-name<myCfg.cfg>,
+    :data-module<JSON::Fast>
+  );
   my Hash $o = $c.refine(<app>);
   ok $o<workdir>:!exists, "app has no workdir";
   is $o<port>, 2345, "port app $o<port>";
@@ -97,7 +111,7 @@ subtest {
   is $o<port>, 2345, "port p1 $o<port>";
 
 
-  $c .= new( :config-name<myCfg.cfg>, :merge);
+  $c .= new( :config-name<myCfg.cfg>, :merge, :data-module<JSON::Fast>);
   $o = $c.refine(<app>);
   is $o<workdir>, '/var/tmp', "workdir app $o<workdir>";
   is $o<port>, 2345, "port app $o<port>";
@@ -111,7 +125,10 @@ subtest {
 #-------------------------------------------------------------------------------
 subtest {
 
-  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Config::DataLang::Refine $c .= new(
+    :config-name<myCfg.cfg>,
+    :data-module<JSON::Fast>
+  );
   my Hash $o = $c.refine-filter(<p2 env>);
   ok $o<perl5lib>:!exists, 'no perl5 lib';
   is-deeply $o<perl6lib>, [ 'lib', '.'], "perl6lib $o<perl6lib>";
@@ -121,7 +138,10 @@ subtest {
 #-------------------------------------------------------------------------------
 subtest {
 
-  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Config::DataLang::Refine $c .= new(
+    :config-name<myCfg.cfg>,
+    :data-module<JSON::Fast>
+  );
   my Array $o = $c.refine-filter-str(<app>);
   ok 'port=2345' ~~ any(@$o), 'port in list';
   nok 'workdir=/tmp' ~~ any(@$o), 'workdir not in list';
@@ -133,7 +153,7 @@ subtest {
   nok 'tunnel' ~~ any(@$o), 'tunnel not in list';
 
 
-  $c .= new( :config-name<myCfg.cfg>, :merge);
+  $c .= new( :config-name<myCfg.cfg>, :merge, :data-module<JSON::Fast>);
   $o = $c.refine-filter-str(<app>);
   ok 'workdir=/var/tmp' ~~ any(@$o), 'app workdir in list';
 
