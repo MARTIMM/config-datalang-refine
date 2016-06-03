@@ -11,20 +11,24 @@ has Hash $.config;
 submethod BUILD (
   Str :$config-name is copy,
   Bool :$merge = False,
-  Str :$data-module = 'Config::TOML';
-#  Array :$locations = [] is copy
+  Array :$locations is copy = [],
+  Str :$data-module = 'Config::TOML'
 ) {
 
+  # Import proper routine and select read routine
   my Sub $read-from-text;
+  my Str $extension;
   given $data-module {
     when 'Config::TOML' {
       require ::($data-module) <&from-toml>;
       $read-from-text = &from-toml;
+      $extension = '.toml';
     }
 
     when 'JSON::Fast' {
       require ::($data-module) <&from-json>;
       $read-from-text = &from-json;
+      $extension = '.json';
     }
 
     default {
@@ -32,28 +36,45 @@ submethod BUILD (
     }
   }
 
+  # Read and deserialize text from file
   my Str $config-content;
 
   # Read file only once
   if not $!config.defined {
 
+    # Check name
+    if $config-name.defined {
+
+      # Check if name holds complete path, relative or absolute
+      if $config-name ~~ m/<[/]>+/ {
+        my Str $base-name = $config-name.IO.basename;
+        my Str $p = $config-name.IO.resolve.Str;
+        $p ~~ s/<[/]>? $base-name $//;
+        $locations.push($p);
+        $config-name = $base-name;
+      }
+    }
+
     # If user didn't define a name, derive it from the program name
-    unless $config-name.defined {
+    else {
       $config-name = $*PROGRAM.basename;
       my Str $ext = $*PROGRAM.extension;
       $config-name ~~ s/\.$ext// if $ext.defined;
-      $config-name ~= '.toml';
+      $config-name ~= $extension;
     }
 
     if $merge {
 
       $config-content = '';
       $!config = {};
-      for File::HomeDir.my-home ~ "/.$config-name",
+      for |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations),
+          File::HomeDir.my-home ~ "/.$config-name",
           ".$config-name", $config-name -> $cfg-name {
 
         if $cfg-name.IO ~~ :r {
           $config-content = slurp($cfg-name) ~ "\n";
+
+#say "Merge $cfg-name";
 
           # Parse config file if exists
           $!config = self!merge-hash( $!config, $read-from-text($config-content));
@@ -68,7 +89,11 @@ submethod BUILD (
     else {
 
       for $config-name, ".$config-name",
-          File::HomeDir.my-home ~ "/.$config-name" -> $cfg-name {
+          File::HomeDir.my-home ~ "/.$config-name",
+          |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations)
+          -> $cfg-name {
+
+#say "Search $cfg-name";
 
         if $cfg-name.IO ~~ :r {
           $config-content = slurp($cfg-name);
@@ -83,10 +108,6 @@ submethod BUILD (
       # Parse config file if exists
       $!config = $read-from-text($config-content);
     }
-
-    # Parse config file if exists
-#say $!config.perl;
-#say $!config<app><p1><workdir>;
   }
 }
 

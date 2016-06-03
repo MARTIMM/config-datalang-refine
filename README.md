@@ -1,12 +1,13 @@
-#Config::TOML refinements
+# Configuration refinements
+[![Build Status](https://travis-ci.org/MARTIMM/config-datalang-refine.svg?branch=master)](https://travis-ci.org/MARTIMM/config-datalang-refine)
 
-#Synopsis
+# Synopsis
 
 The following piece of code
 ```
-use Config::TOML::Refine;
+use Config::DataLang::Refine;
 
-my Config::TOML::Refine $c .= new(:config-name<myConfig.toml>);
+my Config::DataLang::Refine $c .= new(:config-name<myConfig.toml>);
 
 my Hash $hp1 = $c.refine(<options plugin1 test>);
 my Hash $hp2 = $c.refine(<options plugin2 deploy>);
@@ -33,35 +34,18 @@ $hp1 = { key2 => 'val3'};
 $hp2 = { key1 => 'val1', key3 => 'val3'};
 ```
 
-#Description
+# Description
 
-The **Config::TOML::Refine** class adds facilities to use a TOML configuration file and gather the key value pairs by searching topdown a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False.
+The **Config::DataLang::Refine** class adds facilities to use a configuration file and gather the key value pairs by searching top down a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False. For details see the pod file or pdf.
 
-The config file is searched for in the local directory. When not found it tries the hidden (on unix based systems) variant by adding a dot ('.') on front of the name. Then, if that one is not found, it tries the hidden variant in the users home directory. When a config file is found, it stops searching further and parses the file using **Config::TOML**.
-
-There is an option **:merge** which is by default False. When turned on, it will merge all files into one configuration starting with the home directory file up to the visible file in the current directory. This will render the visible file overwriting the values in the hidden file and the keys from the home directory file.
-
-The name of the file is given in **:config-name**. When absent, it will derive the name from the program substituting any extension with *'.toml'*.
-
-The original config file can be retrieved of course.
-
-#methods
-
-##method new( Str :$config-name, Bool :$merge)
-
-#Todo
-
-#Changelog
-
+* 0.3.1
+  * Bugfix in use of **:locations** array and relative/absolute path usage in **:config-name**.
 * 0.3.0
-  * Use **:data-module** to select other modules to load other types of config files. Possible now are Config::TOML and JSON::Fast.
-
+  * Use **:data-module** to select other modules to load other types of config files. Possible configuration data languages are Config::TOML and JSON::Fast.
 * 0.2.0
-  * methods refine-filter(). refine-filter-str() added
-
+  * methods **refine()**, **refine-filter()**. **refine-filter-str()** added
 * 0.1.0
-  * setup using Config::TOML
-  * method new to read config files and **:merge**
+  * setup using config language **Config::TOML**
+  * method **new()** to read config files and **:merge**
   * method refine to get key value pairs
-
 * 0.0.1 Start of the project

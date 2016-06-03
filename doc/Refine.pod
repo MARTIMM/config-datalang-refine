@@ -30,20 +30,20 @@ shell( "perl6 --doc=HTML '$pod' | wkhtmltopdf - '$pdf'");
 </style>
 =end Xhtml
 
-=TITLE class Config::TOML::Refine
+=TITLE class Config::DataLang::Refine
 
-=SUBTITLE Refine use of TOML configuration
+=SUBTITLE Refine use of DataLang configuration
 
-  class Config::TOML::Refine { ... }
+  class Config::DataLang::Refine { ... }
 
 
 =head1 Synopsis
 
 The following piece of code
 
-  use Config::TOML::Refine;
+  use Config::DataLang::Refine;
 
-  my Config::TOML::Refine $c .= new(:config-name<myConfig.toml>);
+  my Config::DataLang::Refine $c .= new(:config-name<myConfig.toml>);
 
   my Hash $hp1 = $c.refine(<options plugin1 test>);
   my Hash $hp2 = $c.refine-filter(<options plugin1 test>);
@@ -86,7 +86,8 @@ Will get you the following as if the variables were set like
 =head1 Description
 
 This class is used for getting configuration data in such a way that several
-levels are accumulated and returned in a single level Hash or Array.
+levels are accumulated into a single level Hash or Array. The top level of the
+configuration should always be a Hash.
 
 
 =head1 Attributes
@@ -97,7 +98,10 @@ Defined as
 
   has Hash $.config;
 
-Stored TOML configuration. Can be retrieved directly from class.
+Stored configuration. Can be retrieved directly from object.
+
+  my $c = Config::DataLang::Refine.new;
+  $c.config<some-key><other-key>;
 
 
 =head1 Methods
@@ -106,20 +110,37 @@ Stored TOML configuration. Can be retrieved directly from class.
 
 Defined as
 
-  submethod BUILD ( Str :$config-name, Bool :$merge = False)
+  submethod BUILD (
+    Str :$config-name,
+    Bool :$merge = False,
+    Array :$locations = [],
+    Str :$data-module = 'Config::TOML'
+  )
 
-Reads TOML text from a file pointed to by $config-name. The file will first be
-searched for in the current directory. Then, if not found, tries to read the
-hidden variant (on unixes) which is the name with a dot ('.') prefixed to the file.
-If that fails too it tries yet another file located in the home directory of the
-user. At last the method throws an exception if no files are found.
+Reads configuration text from a file pointed to by B<:config-name>. The file
+will first be searched for in the current directory. Then, if not found, tries
+to read the hidden variant (on unixes) which is the name with a dot ('.')
+prefixed to the file. If that fails too it tries yet another file (also hidden)
+located in the home directory of the user. At last the method throws an
+exception if no files are found. If B<:config-name> is not defined the program
+name is taken where the extension is substituted by the proper name for the
+configuration language.
 
-$merge is used to merge all the files together starting with the file in the users
-home directory if found. Then it adds or overwrites the options from the second
-file if found and finishing with the last file found. An exception will be thrown
-when the resulting config has no elements.
+When B<:locations> is defined the array will be used as extra paths to search
+for the config file. Example paths to add are C</etc> on unixes or C<C:/Program
+Files/MyApp> on windows.
 
-Config::TOML throws also exceptions when a parse failure takes place.
+When B<:config-name> is a relative or absolute path to a config file, then the
+basename is taken and the path to the file is pushed on the B<:locations> array.
+
+B<:merge> is used to merge all the files together starting with the file in the
+users first and following paths from B<:locations>, Then the one from the home
+directory if found. Then the options from the hidden local file if found and
+finishing with the visible local file found. An exception will be thrown when
+the resulting config has no elements.
+
+The data languages such as C<Config::TOML> also throws an exceptions when it
+fails to parse the configuration text.
 
 
 =head2 refine
@@ -133,7 +154,58 @@ returns a single level Hash.
 
 The process starts with taking the first key from
 the list and gathers all pairs ignoring pairs of which the value is a Hash.
-Then it descends in the config using the 
+Then it descends in the config using the second key. This goes on until the last
+key is used. The process stops when a key does not exist on some level.
 
+
+=head2 refine-filter
+
+Defined as
+
+  method refine-filter ( *@key-list --> Hash )
+
+A simple filter used on the results from B<refine()>. All key/value pairs are
+removed from the result where the value is a C<Bool> and is C<False>.
+
+
+=head2 refine-filter-str
+
+Defined as
+
+  method refine-filter-str ( *@key-list, Str :$glue = ',' --> Array )
+
+All key/value pairs in the result from B<refine-filter()> are converted to
+strings in the following way;
+
+  key => 'value'        # 'key=value'
+  key => 'string value' # 'key=\'string value\''
+  key => 10             # 'key=10'
+  key => True           # 'key'
+  key => False          # '' (Filtered out by refine-filter())
+  key => [ 1, 2, 3]     # 'key=1,2,3'
+
+Each string is pushed on the array which is returned.. The B<:glue> is the
+string used to join elements of an array, this is a ',' by default.
+
+
+A good example for this kind of use is when external programs with options are
+run. E.g. take a look at the following config
+
+  [options.perl6.help]
+    --help      = true
+  
+  [options.perl6.doc]
+    --doc       = 'Pod::To::HTML'
+
+Then the following code
+
+  use Config::DataLang::Refine;
+  
+  my Config::DataLang::Refine $c .= new( :config-name<...>, ...);
+  my Array $a = $c.refine-filter-str(<options perl6 doc>);
+  
+  my Str $cmd = 'perl6 ' ~ $a.join(' ') ~ " foo.pl6";
+  
+Now C<$cmd> has the string C<perl6 --doc=Pod::To::HTML foo.pl6>.
 
 =end pod

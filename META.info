@@ -11,7 +11,10 @@
   "name": "Refine",
   "perl": "6.c",
   "provides": {
-    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6"
+    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6",
+
+    "Refine.pod":                   "doc/Refine.pod",
+    "Refine.pdf":                   "doc/Refine.pdf"
   },
   "source-url": "git://github.com/MARTIMM/config-datalang-refine.git",
   "version": "0.3.0"
