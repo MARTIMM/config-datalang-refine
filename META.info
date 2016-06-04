@@ -17,5 +17,5 @@
     "Refine.pdf":                   "doc/Refine.pdf"
   },
   "source-url": "git://github.com/MARTIMM/config-datalang-refine.git",
-  "version": "0.3.0"
+  "version": "0.3.2"
 }

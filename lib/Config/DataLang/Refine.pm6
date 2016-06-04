@@ -2,7 +2,7 @@ use v6.c;
 use File::HomeDir;
 
 #-------------------------------------------------------------------------------
-unit class Config::DataLang::Refine:ver<0.3.0>:auth<github:MARTIMM>;
+unit class Config::DataLang::Refine:ver<0.3.2>:auth<github:MARTIMM>;
 
 has Str $!config-name;
 has Hash $.config;
