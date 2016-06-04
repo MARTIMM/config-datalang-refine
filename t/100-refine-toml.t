@@ -116,7 +116,8 @@ subtest {
     :data-module<Config::TOML>
  );
 
-  my Hash $o = $c.refine-filter(<p2 env>);
+  my Hash $o = $c.refine( <p2 env>, :filter);
+say $o.perl;
   ok $o<perl5lib>:!exists, 'no perl5 lib';
   is-deeply $o<perl6lib>, [ 'lib', '.'], "perl6lib $o<perl6lib>";
 

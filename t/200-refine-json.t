@@ -129,7 +129,7 @@ subtest {
     :config-name<myCfg.cfg>,
     :data-module<JSON::Fast>
   );
-  my Hash $o = $c.refine-filter(<p2 env>);
+  my Hash $o = $c.refine( <p2 env>, :filter);
   ok $o<perl5lib>:!exists, 'no perl5 lib';
   is-deeply $o<perl6lib>, [ 'lib', '.'], "perl6lib $o<perl6lib>";
 

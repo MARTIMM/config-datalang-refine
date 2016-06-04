@@ -112,7 +112,7 @@ submethod BUILD (
 }
 
 #-------------------------------------------------------------------------------
-method refine ( *@key-list --> Hash ) {
+method refine ( *@key-list, Bool :$filter = False --> Hash ) {
 
   my Hash $refined-list = {};
   my Hash $s = $!config;
@@ -125,19 +125,11 @@ method refine ( *@key-list --> Hash ) {
     for $s.keys -> $k {
       next if $s{$k} ~~ Hash;
       $refined-list{$k} = $s{$k};
+
+      # Looks like too much but it isn't. It must be able to remove
+      # previously set entries.
+      $refined-list{$k}:delete if $filter and $s{$k} ~~ Bool and !$s{$k};
     }
-  }
-
-  $refined-list;
-}
-
-#-------------------------------------------------------------------------------
-method refine-filter ( *@key-list --> Hash ) {
-
-  my Hash $refined-list = self.refine(@key-list) // {};
-  for $refined-list.kv -> $k, $v {
-
-    $refined-list{$k}:delete if $v ~~ Bool and !$v;
   }
 
   $refined-list;

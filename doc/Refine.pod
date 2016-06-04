@@ -147,7 +147,7 @@ fails to parse the configuration text.
 
 Defined as
 
-  method refine ( *@key-list --> Hash )
+  method refine ( *@key-list, Bool :$filter = False --> Hash )
 
 Processes data in the config using the keys from the @key-list. The method
 returns a single level Hash.
@@ -157,15 +157,8 @@ the list and gathers all pairs ignoring pairs of which the value is a Hash.
 Then it descends in the config using the second key. This goes on until the last
 key is used. The process stops when a key does not exist on some level.
 
-
-=head2 refine-filter
-
-Defined as
-
-  method refine-filter ( *@key-list --> Hash )
-
-A simple filter used on the results from B<refine()>. All key/value pairs are
-removed from the result where the value is a C<Bool> and is C<False>.
+A simple filter is used on the results if B<:filter> is set. All key/value pairs
+are removed from the result where the value is a C<Bool> and is C<False>.
 
 
 =head2 refine-filter-str
