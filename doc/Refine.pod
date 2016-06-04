@@ -46,9 +46,9 @@ The following piece of code
   my Config::DataLang::Refine $c .= new(:config-name<myConfig.toml>);
 
   my Hash $hp1 = $c.refine(<options plugin1 test>);
-  my Hash $hp2 = $c.refine-filter(<options plugin1 test>);
-  my Array $ap3 = $c.refine-filter-str(<options plugin1 deploy>);
-  my Array $ap4 = $c.refine-filter-str(<options plugin2 deploy>);
+  my Hash $hp2 = $c.refine( <options plugin1 test>, :filter);
+  my Array $ap3 = $c.refine-str( <options plugin1 deploy>, :filter);
+  my Array $ap4 = $c.refine-str( <options plugin2 deploy>, :filter);
 
 With the following config file in myConfig.toml
 
@@ -165,10 +165,17 @@ are removed from the result where the value is a C<Bool> and is C<False>.
 
 Defined as
 
-  method refine-filter-str ( *@key-list, Str :$glue = ',' --> Array )
+  method refine-str (
+    *@key-list,
+    Str :$glue = ',',
+    Bool :$filter = False
+    StrMode :$str-mode = C-URI-OPTS
+    --> Array
+  )
 
 All key/value pairs in the result from B<refine-filter()> are converted to
-strings in the following way;
+strings in the following way by default, i.e. B<:str-mode> is set to
+C<C-URI-OPTS>;
 
   key => 'value'        # 'key=value'
   key => 'string value' # 'key=\'string value\''
@@ -179,6 +186,7 @@ strings in the following way;
 
 Each string is pushed on the array which is returned.. The B<:glue> is the
 string used to join elements of an array, this is a ',' by default.
+
 
 
 A good example for this kind of use is when external programs with options are
@@ -195,7 +203,7 @@ Then the following code
   use Config::DataLang::Refine;
   
   my Config::DataLang::Refine $c .= new( :config-name<...>, ...);
-  my Array $a = $c.refine-filter-str(<options perl6 doc>);
+  my Array $a = $c.refine-str( <options perl6 doc>);
   
   my Str $cmd = 'perl6 ' ~ $a.join(' ') ~ " foo.pl6";
   

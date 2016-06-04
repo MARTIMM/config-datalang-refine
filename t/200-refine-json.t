@@ -142,25 +142,25 @@ subtest {
     :config-name<myCfg.cfg>,
     :data-module<JSON::Fast>
   );
-  my Array $o = $c.refine-filter-str(<app>);
+  my Array $o = $c.refine-str( <app>, :filter);
   ok 'port=2345' ~~ any(@$o), 'port in list';
   nok 'workdir=/tmp' ~~ any(@$o), 'workdir not in list';
 
-  $o = $c.refine-filter-str(<app p2>);
+  $o = $c.refine-str( <app p2>, :filter);
   ok 'port=2345' ~~ any(@$o), 'port in list';
   ok 'workdir=~/p2' ~~ any(@$o), 'workdir in list';
-  ok 'vision' ~~ any(@$o), 'vision in list';
+  ok 'vision=True' ~~ any(@$o), 'vision in list';
   nok 'tunnel' ~~ any(@$o), 'tunnel not in list';
 
 
   $c .= new( :config-name<myCfg.cfg>, :merge, :data-module<JSON::Fast>);
-  $o = $c.refine-filter-str(<app>);
+  $o = $c.refine-str( <app>, :filter);
   ok 'workdir=/var/tmp' ~~ any(@$o), 'app workdir in list';
 
-  $o = $c.refine-filter-str(<app p2>);
+  $o = $c.refine-str( <app p2>, :filter);
   ok "text='abc def xyz'" ~~ any(@$o), 'p2 text in list';
 
-  $o = $c.refine-filter-str(<p2>);
+  $o = $c.refine-str( <p2>, :filter);
   ok 'workdir=~/p2' ~~ any(@$o), 'p2 workdir in list';
   ok 'times=10,11,12' ~~ any(@$o), 'p2 times in list';
 

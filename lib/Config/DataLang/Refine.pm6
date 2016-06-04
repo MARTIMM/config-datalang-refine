@@ -7,6 +7,11 @@ unit class Config::DataLang::Refine:ver<0.3.0>:auth<github:MARTIMM>;
 has Str $!config-name;
 has Hash $.config;
 
+subset StrMode of Int where 10 <= $_ <= 11;
+constant C-URI-OPTS is export             = 10;
+constant C-UNIX-OPTS-T1 is export         = 11;
+#constant C-UNIX-OPTS-T2         = 10 is export;
+
 #-------------------------------------------------------------------------------
 submethod BUILD (
   Str :$config-name is copy,
@@ -136,11 +141,35 @@ method refine ( *@key-list, Bool :$filter = False --> Hash ) {
 }
 
 #-------------------------------------------------------------------------------
-method refine-filter-str ( *@key-list, Str :$glue = ',' --> Array ) {
+method refine-str (
+  *@key-list,
+  Str :$glue = ',',
+  Bool :$filter = False,
+  StrMode :$str-mode = C-URI-OPTS;
+  --> Array
+) {
 
+  my Str $entry;
   my Array $refined-list = [];
-  my Hash $o = self.refine(@key-list) // {};
+  my Hash $o = self.refine( @key-list, :$filter) // {};
+
   for $o.kv -> $k, $v {
+
+    given $str-mode {
+      when C-URI-OPTS {
+        $entry = "$k=";
+      }
+      
+      when C-UNIX-OPTS-T1 {
+        if $k.chars == 1 {
+          $entry = "-$k";
+        }
+        
+        else {
+          $entry = ( $v ~~ Bool and ?$v ) ?? "--$k" !! "--$k="; 
+        }
+      }
+    }
 
     given $v {
       # should not happen
@@ -149,21 +178,23 @@ method refine-filter-str ( *@key-list, Str :$glue = ',' --> Array ) {
       }
 
       when Array {
-        $refined-list.push: "$k=" ~ $v.join($glue);
+        $entry ~= $v.join($glue);
       }
 
       when Bool {
-        $refined-list.push: $k if $v;
+        $entry = $str-mode ~~ C-URI-OPTS ?? "$k=$v" !! "";
       }
 
       when /\s/ {
-        $refined-list.push: "$k='$v'";
+        $entry ~= "'$v'";
       }
 
       default {
-        $refined-list.push: "$k=$v";
+        $entry ~= $v;
       }
     }
+
+    $refined-list.push: $entry;
   }
 
   $refined-list;
