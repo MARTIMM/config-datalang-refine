@@ -7,10 +7,10 @@ unit class Config::DataLang::Refine:ver<0.3.2>:auth<github:MARTIMM>;
 has Str $!config-name;
 has Hash $.config;
 
-subset StrMode of Int where 10 <= $_ <= 11;
-constant C-URI-OPTS is export             = 10;
-constant C-UNIX-OPTS-T1 is export         = 11;
-#constant C-UNIX-OPTS-T2         = 10 is export;
+subset StrMode of Int where 10 <= $_ <= 12;
+constant C-URI-OPTS             is export = 10;
+constant C-UNIX-OPTS-T1         is export = 11;
+constant C-UNIX-OPTS-T2         is export = 12;
 
 #-------------------------------------------------------------------------------
 submethod BUILD (
@@ -145,7 +145,7 @@ method refine-str (
   *@key-list,
   Str :$glue = ',',
   Bool :$filter = False,
-  StrMode :$str-mode = C-URI-OPTS;
+  StrMode :$str-mode = C-URI-OPTS
   --> Array
 ) {
 
@@ -153,48 +153,132 @@ method refine-str (
   my Array $refined-list = [];
   my Hash $o = self.refine( @key-list, :$filter) // {};
 
-  for $o.kv -> $k, $v {
+  if $str-mode == C-URI-OPTS {
+    for $o.kv -> $k, $v {
+      given $v {
+        # should not happen
+        when Hash {
+          next;
+        }
 
-    given $str-mode {
-      when C-URI-OPTS {
-        $entry = "$k=";
-      }
-      
-      when C-UNIX-OPTS-T1 {
-        if $k.chars == 1 {
-          $entry = "-$k";
+        when Array {
+          $entry = "$k=" ~ $v.join($glue);
         }
-        
-        else {
-          $entry = ( $v ~~ Bool and ?$v ) ?? "--$k" !! "--$k="; 
+
+        when /\s/ {
+          $entry = "$k='$v'";
+        }
+
+        default {
+          $entry = "$k=$v";
         }
       }
+
+      $refined-list.push: $entry;
+    }
+  }
+
+  elsif $str-mode == C-UNIX-OPTS-T1 {
+
+    for $o.kv -> $k, $v {
+
+      given $v {
+        # should not happen
+        when Hash {
+          next;
+        }
+
+        when Array {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v.join($glue);
+        }
+
+        when Bool {
+          if $k.chars == 1 {
+            if ?$v {
+              $entry = "-$k";
+            }
+
+            else {
+              $entry = "-no$k";
+            }
+          }
+          
+          else {
+            if ?$v {
+              $entry = "--$k";
+            }
+
+            else {
+              $entry = "--no$k";
+            }
+          }
+        }
+
+        when /\s/ {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "'$v'";
+        }
+
+        default {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v;
+        }
+      }
+
+      $refined-list.push: $entry;
+    }
+  }
+
+  elsif $str-mode == C-UNIX-OPTS-T2 {
+    my Str $T2-entry = '-';
+
+    for $o.kv -> $k, $v {
+
+      $entry = '';
+
+      given $v {
+        # should not happen
+        when Hash {
+          next;
+        }
+
+        when Array {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v.join($glue);
+        }
+
+        when Bool {
+          if $k.chars == 1 {
+            if ?$v {
+              $T2-entry ~= "$k";
+            }
+
+            else {
+              $entry = "-no$k";
+            }
+          }
+          
+          else {
+            if ?$v {
+              $entry = "--$k";
+            }
+
+            else {
+              $entry = "--no$k";
+            }
+          }
+        }
+
+        when /\s/ {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "'$v'";
+        }
+
+        default {
+          $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v;
+        }
+      }
+
+      $refined-list.push: $entry if ?$entry;
     }
 
-    given $v {
-      # should not happen
-      when Hash {
-        next;
-      }
-
-      when Array {
-        $entry ~= $v.join($glue);
-      }
-
-      when Bool {
-        $entry = $str-mode ~~ C-URI-OPTS ?? "$k=$v" !! "";
-      }
-
-      when /\s/ {
-        $entry ~= "'$v'";
-      }
-
-      default {
-        $entry ~= $v;
-      }
-    }
-
-    $refined-list.push: $entry;
+    $refined-list.push: $T2-entry if $T2-entry.chars > 1;
   }
 
   $refined-list;

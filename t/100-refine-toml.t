@@ -34,6 +34,9 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
   # App control
   [app]
     port        = 2345
+    p           = true
+    q           = true
+    test        = false
 
   # App control for plugin p1
   [app.p1]
@@ -127,11 +130,12 @@ subtest {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
   my Array $o = $c.refine-str( <app>, :filter);
+
   ok 'port=2345' ~~ any(@$o), 'port in list';
   nok 'workdir=/tmp' ~~ any(@$o), 'workdir not in list';
 
   $o = $c.refine-str( <app p2>, :filter);
-say $o.perl;
+
   ok 'port=2345' ~~ any(@$o), 'port in list';
   ok 'workdir=~/p2' ~~ any(@$o), 'workdir in list';
   ok 'vision=True' ~~ any(@$o), 'vision in list';
@@ -148,6 +152,61 @@ say $o.perl;
   $o = $c.refine-str( <p2>, :filter);
   ok 'workdir=~/p2' ~~ any(@$o), 'p2 workdir in list';
   ok 'times=10,11,12' ~~ any(@$o), 'p2 times in list';
+
+}, 'refine filter string array tests';
+
+#-------------------------------------------------------------------------------
+subtest {
+
+  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Array $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T1));
+  ok '--port=2345' ~~ any(@$o), 'app --port in list';
+  nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
+  ok '-p' ~~ any(@$o), 'app -p in list';
+  ok '-q' ~~ any(@$o), 'app -q in list';
+
+  $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
+  ok '--port=2345' ~~ any(@$o), 'port in list';
+  ok '--workdir=~/p2' ~~ any(@$o), 'workdir ~/p2 in list';
+  ok '--vision' ~~ any(@$o), '--vision in list';
+  nok '--tunnel' ~~ any(@$o), '--tunnel not in list';
+
+
+  $c .= new( :config-name<myCfg.cfg>, :merge);
+  $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T1));
+  ok '--workdir=/var/tmp' ~~ any(@$o), 'app --workdir /var/tmp  in list';
+
+  $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
+  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text in list';
+
+  $o = $c.refine-str( <p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
+  ok '--workdir=~/p2' ~~ any(@$o), 'p2 --workdir ~/p2 in list';
+  ok '--times=10,11,12' ~~ any(@$o), 'p2 --times in list';
+
+}, 'refine filter string array tests';
+
+#-------------------------------------------------------------------------------
+subtest {
+
+  my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+  my Array $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T2));
+
+  ok '--port=2345' ~~ any(@$o), 'app --port in list';
+  nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
+  nok '-p' ~~ any(@$o), 'app -p not in list';
+  nok '-q' ~~ any(@$o), 'app -q not in list';
+  ok '-pq' ~~ any(@$o), 'app -pq in list';
+
+
+  $c .= new(:config-name<myCfg.cfg>);
+  $o = $c.refine-str( <app>, :str-mode(C-UNIX-OPTS-T2));
+#say $o.perl;
+  ok '--port=2345' ~~ any(@$o), 'app --port in list';
+  nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
+  nok '-p' ~~ any(@$o), 'app -p not in list';
+  nok '-q' ~~ any(@$o), 'app -q not in list';
+  ok '-pq' ~~ any(@$o), 'app -pq in list';
+  ok '--notest' ~~ any(@$o), 'app -notest in list';
 
 }, 'refine filter string array tests';
 
