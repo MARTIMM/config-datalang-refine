@@ -2,15 +2,16 @@ use v6.c;
 use File::HomeDir;
 
 #-------------------------------------------------------------------------------
-unit class Config::DataLang::Refine:ver<0.3.2>:auth<github:MARTIMM>;
+unit class Config::DataLang::Refine:ver<0.3.3>:auth<github:MARTIMM>;
 
 has Str $!config-name;
 has Hash $.config;
 
-subset StrMode of Int where 10 <= $_ <= 12;
-constant C-URI-OPTS             is export = 10;
-constant C-UNIX-OPTS-T1         is export = 11;
-constant C-UNIX-OPTS-T2         is export = 12;
+subset StrMode of Int where 10 <= $_ <= 13;
+constant C-URI-OPTS-T1          is export = 10;
+constant C-URI-OPTS-T2          is export = 11;
+constant C-UNIX-OPTS-T1         is export = 12;
+constant C-UNIX-OPTS-T2         is export = 13;
 
 #-------------------------------------------------------------------------------
 submethod BUILD (
@@ -145,7 +146,7 @@ method refine-str (
   *@key-list,
   Str :$glue = ',',
   Bool :$filter = False,
-  StrMode :$str-mode = C-URI-OPTS
+  StrMode :$str-mode = C-URI-OPTS-T1
   --> Array
 ) {
 
@@ -153,8 +154,10 @@ method refine-str (
   my Array $refined-list = [];
   my Hash $o = self.refine( @key-list, :$filter) // {};
 
-  if $str-mode == C-URI-OPTS {
-    for $o.kv -> $k, $v {
+  if $str-mode ~~ any(C-URI-OPTS-T1|C-URI-OPTS-T2) {
+    for $o.kv -> $k is copy, $v is copy {
+      $k = self!encode-uri-t2($k) if $str-mode == C-URI-OPTS-T2;
+
       given $v {
         # should not happen
         when Hash {
@@ -162,14 +165,19 @@ method refine-str (
         }
 
         when Array {
-          $entry = "$k=" ~ $v.join($glue);
+          $v = $v.join($glue);
+          $v = self!encode-uri-t2($v) if $str-mode == C-URI-OPTS-T2;
+          $entry = "$k=$v";
         }
 
         when /\s/ {
-          $entry = "$k='$v'";
+          $v = "'$v'" if $str-mode == C-URI-OPTS-T1;
+          $v = self!encode-uri-t2($v) if $str-mode == C-URI-OPTS-T2;
+          $entry = "$k=$v";
         }
 
         default {
+          $v = self!encode-uri-t2($v) if $str-mode == C-URI-OPTS-T2;
           $entry = "$k=$v";
         }
       }
@@ -199,10 +207,10 @@ method refine-str (
             }
 
             else {
-              $entry = "-no$k";
+              $entry = "--no$k";
             }
           }
-          
+
           else {
             if ?$v {
               $entry = "--$k";
@@ -251,10 +259,10 @@ method refine-str (
             }
 
             else {
-              $entry = "-no$k";
+              $entry = "--no$k";
             }
           }
-          
+
           else {
             if ?$v {
               $entry = "--$k";
@@ -282,6 +290,54 @@ method refine-str (
   }
 
   $refined-list;
+}
+
+#-------------------------------------------------------------------------------
+method !encode-uri-t2 ( Str $entry --> Str ) {
+
+  my Str $new-entry = '';
+  for ($entry ~~ /(.)+/).flat -> $c is copy { 
+    $c = $c.Str;
+    my int $c-ord = $c.ord;
+
+    if 0x19 < $c-ord < 0x30
+       or 0x39 < $c-ord < 0x41
+       or 0x5a < $c-ord < 0x61
+       or 0x7a < $c-ord < 0x80
+       or $c.ord ~~ any(0x81|0x8f|0x9D) {
+      $new-entry ~= $c.ord.fmt('%%%02X');
+    }
+
+    elsif $c-ord == 0x80 {
+      $new-entry ~= '%E2%82%AC';
+    }
+
+    elsif $c-ord == 0x82 {
+      $new-entry ~= '%E2%80%9A';
+    }
+
+    elsif $c-ord == 0x83 {
+      $new-entry ~= '%C6%92';
+    }
+
+    elsif $c-ord == 0x84 {
+      $new-entry ~= '%E2%80%9E';
+    }
+
+    elsif $c-ord == 0x85 {
+      $new-entry ~= '%E2%80%A6';
+    }
+
+    elsif $c-ord == 0x86 {
+      $new-entry ~= '%E2%80%A0';
+    }
+
+    else {
+      $new-entry ~= $c;
+    }
+  }
+
+  $new-entry;
 }
 
 #-------------------------------------------------------------------------------

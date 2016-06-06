@@ -38,6 +38,8 @@ $hp2 = { key1 => 'val1', key3 => 'val3'};
 
 The **Config::DataLang::Refine** class adds facilities to use a configuration file and gather the key value pairs by searching top down a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False. For details see the pod file or pdf.
 
+* 0.3.3
+  * Added modes used to create strings with refine-str.
 * 0.3.2
   * Removed **refine-filter()** and added named argument **:filter** to **refine()**.
   * Renamed **refine-filter-str()** to **refine-str()** and added named argument **:filter**.
