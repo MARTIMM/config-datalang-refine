@@ -34,6 +34,46 @@ $hp1 = { key2 => 'val3'};
 $hp2 = { key1 => 'val1', key3 => 'val3'};
 ```
 
+A better example might be from the MongoDB project to test several server setups, the config again in TOML format;
+```
+[mongod]
+  journal = false
+  fork = true
+  smallfiles = true
+  oplogSize = 128
+  logappend = true
+
+# Configuration for Server 1
+[mongod.s1]
+  logpath = './Sandbox/Server1/m.log'
+  pidfilepath = './Sandbox/Server1/m.pid'
+  dbpath = './Sandbox/Server1/m.data'
+  port = 65010
+
+[mongod.s1.replicate1]
+  replSet = 'first_replicate'
+
+[mongod.s1.replicate2]
+  replSet = 'second_replicate'
+
+[mongod.s1.authenticate]
+  auth = true
+```
+Now, to get run options to start server 1 one does the following;
+```
+my Config::DataLang::Refine $c .= new(:config-name<mongoservers.toml>);
+my Array $opts = $c.refine-str( <mongod s1 replicate1>, :C-UNIX-OPTS-T2);
+
+# Output
+# --nojournal, --fork, --smallfiles, --oplogSize=128, --logappend,
+# --logpath='./Sandbox/Server1/m.log', --pidfilepath='./Sandbox/Server1/m.pid',
+# --dbpath='./Sandbox/Server1/m.data', --port=65010, --replSet=first_replicate
+```
+Easy to run the server now;
+```
+my Proc $proc = shell(('/usr/bin/mongod', |@$opts).join(' '));
+```
+
 # Description
 
 The **Config::DataLang::Refine** class adds facilities to use a configuration file and gather the key value pairs by searching top down a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False. For details see the pod file or pdf.

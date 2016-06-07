@@ -6,9 +6,9 @@
     "JSON::Fast",
     "File::HomeDir"
   ],
-  "description": "Refinements to the use of Config::TOML",
+  "description": "Refinements to the use of some configuration language such as Config::TOML",
   "license": "The Artistic License 2.0",
-  "name": "Refine",
+  "name": "Config::DataLang::Refine",
   "perl": "6.c",
   "provides": {
     "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6",
