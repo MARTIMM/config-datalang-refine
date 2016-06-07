@@ -6,15 +6,14 @@
     "JSON::Fast",
     "File::HomeDir"
   ],
-  "description": "Refinements to the use of some configuration language such as Config::TOML",
+  "description": "Refinements on use of configurations loaded with parsers such as found in Config::TOML",
   "license": "The Artistic License 2.0",
   "name": "Config::DataLang::Refine",
   "perl": "6.c",
   "provides": {
     "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6",
 
-    "Refine.pod":                   "doc/Refine.pod",
-    "Refine.pdf":                   "doc/Refine.pdf"
+    "Refine.pod":                   "doc/Refine.pod"
   },
   "source-url": "git://github.com/MARTIMM/config-datalang-refine.git",
   "version": "0.3.3"

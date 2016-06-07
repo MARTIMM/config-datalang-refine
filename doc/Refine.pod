@@ -32,7 +32,7 @@ shell( "perl6 --doc=HTML '$pod' | wkhtmltopdf - '$pdf'");
 
 =TITLE class Config::DataLang::Refine
 
-=SUBTITLE Refine use of DataLang configuration
+=SUBTITLE Refine use of some configuration loaded with config loaders such as Config::TOML
 
   class Config::DataLang::Refine { ... }
 
