@@ -205,8 +205,11 @@ fails to parse the configuration text.
                                 /opt/etc/x.cfg
 
 
-When :merge is used the search is started at the end of the list ending at the
-first file.
+When B<:merge> is used the search is started at the end of the list ending at
+the first file.
+
+For B<:data-module> the modules C<Config::TOML> and C<JSON::Fast> are recognized.
+
 
 =head2 refine
 
@@ -244,7 +247,7 @@ Defined as
     --> Array
   )
 
-Each string is pushed on the array which is returned.. The B<:glue> is the
+Each string is pushed on the array which is returned. The B<:glue> is the
 string used to join elements of an array, this is a ',' by default.
 
   :str-mode = C-URI-OPTS-T1 which is the default
@@ -281,6 +284,7 @@ together with a '&' character. All strings will be encoded for the first
 
 All single letter keys get only one dash on front like -k or -k=v. The
 mode C-UNIX-OPTS-T2 does the same but gathers all single character keys without
-values are gatheres together. E.g. --key, -l, -m, -t=1 becomes --key, -lm, -t=1
+values together prefixed with a dash. E.g. --key, -l, -m, -t=1 becomes --key,
+-lm, -t=1
 
 =end pod
