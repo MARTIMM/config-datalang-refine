@@ -16,5 +16,5 @@
     "Refine.pod":                   "doc/Refine.pod"
   },
   "source-url": "git://github.com/MARTIMM/config-datalang-refine.git",
-  "version": "0.3.3"
+  "version": "0.3.4"
 }
