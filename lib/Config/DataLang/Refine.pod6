@@ -152,27 +152,28 @@ Defined as
     Str :$config-name,
     Bool :$merge = False,
     Array :$locations = [],
-    Str :$data-module = 'Config::TOML'
+    Str :$data-module = 'Config::TOML',
+    Hash :$other-config = {}
   )
 
-Reads configuration text from a file pointed to by B<:config-name>. The file
+Reads configuration text from a file pointed to by C<:config-name>. The file
 will first be searched for in the current directory. Then, if not found, tries
 to read the hidden variant (on unixes) which is the name with a dot ('.')
 prefixed to the file. If that fails too it tries yet another file (also hidden)
 located in the home directory of the user. At last the method throws an
-exception if no files are found. If B<:config-name> is not defined the program
+exception if no files are found. If C<:config-name> is not defined the program
 name is taken where the extension is substituted by the proper name for the
 configuration language.
 
-When B<:locations> is defined the array will be used as extra paths to search
+When C<:locations> is defined the array will be used as extra paths to search
 for the config file. Example paths to add are C</etc> on unixes or C<C:/Program
 Files/MyApp> on windows.
 
-When B<:config-name> is a relative or absolute path to a config file, then the
-basename is taken and the path to the file is pushed on the B<:locations> array.
+When C<:config-name> is a relative or absolute path to a config file, then the
+basename is taken and the path to the file is pushed on the C<:locations> array.
 
-B<:merge> is used to merge all the files together starting with the file in the
-users first and following paths from B<:locations>, Then the one from the home
+C<:merge> is used to merge all the files together starting with the file in the
+users first and following paths from C<:locations>, Then the one from the home
 directory if found. Then the options from the hidden local file if found and
 finishing with the visible local file found. An exception will be thrown when
 the resulting config has no elements.
@@ -205,11 +206,15 @@ fails to parse the configuration text.
                                 /opt/etc/x.cfg
 
 
-When B<:merge> is used the search is started at the end of the list ending at
+When C<:merge> is used the search is started at the end of the list ending at
 the first file.
 
-For B<:data-module> the modules C<Config::TOML> and C<JSON::Fast> are recognized.
+For C<:data-module> the modules C<Config::TOML> and C<JSON::Fast> are recognized.
 
+C<:other-config> can be used when the caller has already a config of its own.
+This will be modified by subsequent config loads. The C<:merge> is flipped to
+True. With this, it is possible to repeat the config loads with configs from
+previous loads.
 
 =head2 refine
 
@@ -225,7 +230,7 @@ the list and gathers all pairs ignoring pairs of which the value is a Hash.
 Then it descends in the config using the second key. This goes on until the last
 key is used. The process stops when a key does not exist on some level.
 
-A simple filter is used on the results if B<:filter> is set. All key/value pairs
+A simple filter is used on the results if C<:filter> is set. All key/value pairs
 are removed from the result where the value is a C<Bool> and is C<False>.
 
   type          :!filter        :filter
@@ -247,7 +252,7 @@ Defined as
     --> Array
   )
 
-Each string is pushed on the array which is returned. The B<:glue> is the
+Each string is pushed on the array which is returned. The C<:glue> is the
 string used to join elements of an array, this is a ',' by default.
 
   :str-mode = C-URI-OPTS-T1 which is the default

@@ -1,6 +1,5 @@
-
-The **Config::DataLang::Refine** class adds facilities to use a configuration file and gather the key value pairs by searching top down a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False. For details see the pod file or [pdf](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/Refine.pdf).
-
+* 0.4.0
+  * Possibility to offer a config Hash when instantiating. :merge is turned on.
 * 0.3.5
   * housekeeping shores
 * 0.3.4

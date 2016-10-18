@@ -76,5 +76,10 @@ my Proc $proc = shell(('/usr/bin/mongod', |@$opts).join(' '));
 
 # Description
 
-# Changes
-See document doc/CHANGES.md
+The **Config::DataLang::Refine** class adds facilities to use a configuration file and gather the key value pairs by searching top down a list of keys thereby refining the resulting set of keys. Boolean values are used to add a key without a value when True or to cancel a previously found key out when False.
+
+# Documentation
+
+Look for documentation and other information at
+* [Config::DataLang::Refine](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/Refine.pdf)
+* [Release notes](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/CHANGES.md)
