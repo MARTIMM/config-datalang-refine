@@ -6,6 +6,7 @@ unit class Config::DataLang::Refine:ver<0.3.4>:auth<github:MARTIMM>;
 
 has Str $!config-name;
 has Hash $.config;
+has Array $!config-names = [];
 
 subset StrMode of Int where 10 <= $_ <= 13;
 constant C-URI-OPTS-T1          is export = 10;
@@ -16,10 +17,16 @@ constant C-UNIX-OPTS-T2         is export = 13;
 #-------------------------------------------------------------------------------
 submethod BUILD (
   Str :$config-name is copy,
-  Bool :$merge = False,
+  Bool :$merge is copy = False,
   Array :$locations is copy = [],
-  Str :$data-module = 'Config::TOML'
+  Str :$data-module = 'Config::TOML',
+  Hash :$other-config = {}
 ) {
+
+  # When the caller provides a configuration as a base, set that as a starting
+  # point and set merge to True
+  $merge = True if $other-config.elems;
+  $!config = $other-config;
 
   # Import proper routine and select read routine
   my Sub $read-from-text;
@@ -45,26 +52,29 @@ submethod BUILD (
   # Read and deserialize text from file
   my Str $config-content;
 
-  # Read file only once
-  if not $!config.defined {
+  # Read series of config files only once.
+  my Str $basename = ($config-name // $*PROGRAM.Str).IO.basename;
+  if $basename !~~ any(@$!config-names) {
+
+    # Save it to prevent rereading
+    $!config-names.push($basename);
 
     # Check name
     if $config-name.defined {
 
       # Check if name holds complete path, relative or absolute
       if $config-name ~~ m/<[/]>+/ {
-        my Str $base-name = $config-name.IO.basename;
         my Str $p = $config-name.IO.resolve.Str;
-        $p ~~ s/<[/]>? $base-name $//;
+        $p ~~ s/<[/]>? $basename $//;
         $locations.push($p);
-        $config-name = $base-name;
+        $config-name = $basename;
       }
     }
 
     # If user didn't define a name, derive it from the program name
     else {
-      $config-name = $*PROGRAM.basename;
-      my Str $ext = $*PROGRAM.extension;
+      $config-name = $basename;
+      my Str $ext = $basename.IO.extension;
       $config-name ~~ s/\.$ext// if $ext.defined;
       $config-name ~= $extension;
     }
@@ -72,15 +82,12 @@ submethod BUILD (
     if $merge {
 
       $config-content = '';
-      $!config = {};
       for |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations),
           File::HomeDir.my-home ~ "/.$config-name",
           ".$config-name", $config-name -> $cfg-name {
 
         if $cfg-name.IO ~~ :r {
           $config-content = slurp($cfg-name) ~ "\n";
-
-#say "Merge $cfg-name";
 
           # Parse config file if exists
           $!config = self!merge-hash( $!config, $read-from-text($config-content));

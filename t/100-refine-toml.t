@@ -77,6 +77,7 @@ subtest {
   is $c.config<app><p1><workdir>, '/tmp', "workdir p1 $c.config()<app><p1><workdir>";
   ok $c.config<app><p1><host>:!exists, 'no host';
   is $c.config<app><p2><workdir>, '~/p2', "workdir p2 $c.config()<app><p2><workdir>";
+  ok $c.config<app><p3><workdir>:!exists, "workdir p3 not existent";
 
   $c .= new( :config-name<myCfg.cfg>, :merge);
   is $c.config<app><workdir>, '/var/tmp', "workdir app $c.config()<app><workdir>";
@@ -87,7 +88,34 @@ subtest {
   nok $c.config<app><p2><tunnel>, 'tunnel p2 false';
   ok $c.config<app><p2><vision>, 'vision p2 true';
 
-}, 'build tests';
+}, 'build test, two config files';
+
+#-------------------------------------------------------------------------------
+subtest {
+
+  my Hash $other-config = {
+    app => {
+      p3 => {
+        workdir => '~/p3',
+        vision => True,
+        env => {
+          PATH => ['/opt/bin'],
+        }
+      }
+    }
+  }
+
+  my Config::DataLang::Refine $c .= new(
+    :config-name<myCfg.cfg>,
+    :$other-config
+  );
+
+  is $c.config<app><p1><workdir>, '/tmp', "workdir p1 $c.config()<app><p1><workdir>";
+  is $c.config<app><p3><workdir>, '~/p3', "workdir p3 $c.config()<app><p3><workdir>";
+  ok $c.config<app><p3><vision>, "p3 vision True";
+  is $c.config<app><p3><env><PATH>[0], '/opt/bin', "Check p3 path = /opt/bin";
+
+}, 'build test, one config Hash and two config files';
 
 #-------------------------------------------------------------------------------
 subtest {
