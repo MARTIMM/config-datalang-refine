@@ -1,6 +1,6 @@
 # Configuration refinements
 [![Build Status](https://travis-ci.org/MARTIMM/config-datalang-refine.svg?branch=master)](https://travis-ci.org/MARTIMM/config-datalang-refine)
-[![License](https://github.com/MARTIMM/config-datalang-refine/blob/master/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
+[![License](http://martimm.github.io/config-datalang-refine/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 # Synopsis
 
