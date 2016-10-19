@@ -82,7 +82,7 @@ submethod BUILD (
     if $merge {
 
       $config-content = '';
-      for |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations),
+      for |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations.reverse),
           File::HomeDir.my-home ~ "/.$config-name",
           ".$config-name", $config-name -> $cfg-name {
 
