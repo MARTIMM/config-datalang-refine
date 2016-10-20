@@ -1,5 +1,4 @@
 use v6.c;
-use File::HomeDir;
 
 #-------------------------------------------------------------------------------
 unit class Config::DataLang::Refine:ver<0.3.4>:auth<github:MARTIMM>;
@@ -83,7 +82,7 @@ submethod BUILD (
 
       $config-content = '';
       for |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations.reverse),
-          File::HomeDir.my-home ~ "/.$config-name",
+          $*HOME.Str ~ "/.$config-name",
           ".$config-name", $config-name -> $cfg-name {
 
         if $cfg-name.IO ~~ :r {
@@ -102,7 +101,7 @@ submethod BUILD (
     else {
 
       for $config-name, ".$config-name",
-          File::HomeDir.my-home ~ "/.$config-name",
+          $*HOME ~ "/.$config-name",
           |(map {[~] .IO.resolve.Str, '/', $config-name}, @$locations)
           -> $cfg-name {
 
