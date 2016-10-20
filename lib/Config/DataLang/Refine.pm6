@@ -90,7 +90,7 @@ submethod BUILD (
           $config-content = slurp($cfg-name) ~ "\n";
 
           # Parse config file if exists
-          $!config = self!merge-hash( $!config, $read-from-text($config-content));
+          $!config = self.merge-hash( $!config, $read-from-text($config-content));
         }
       }
 
@@ -348,14 +348,35 @@ method !encode-uri-t2 ( Str $entry --> Str ) {
 }
 
 #-------------------------------------------------------------------------------
-method !merge-hash ( Hash $h1, Hash $h2 --> Hash ) {
+multi method merge-hash ( Hash:D $h1, Hash:D $h2 --> Hash ) {
 
   my Hash $h3 = $h1;
   for $h2.kv -> $k, $v {
 
     if $v ~~ Hash {
 
-      $h3{$k} = self!merge-hash( $h3{$k} // {}, $v);
+      $h3{$k} = self.merge-hash( $h3{$k} // {}, $v);
+    }
+
+    else {
+
+      $h3{$k} = $v;
+    }
+  }
+
+  $h3 // {};
+}
+
+#-------------------------------------------------------------------------------
+multi method merge-hash ( Hash:D $h2 --> Hash ) {
+
+  my Hash $h1 := $!config;
+  my Hash $h3 = $h1;
+  for $h2.kv -> $k, $v {
+
+    if $v ~~ Hash {
+
+      $h3{$k} = self.merge-hash( $h3{$k} // {}, $v);
     }
 
     else {

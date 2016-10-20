@@ -1,3 +1,5 @@
+* 0.4.1
+  * Make merge-hash available for external use. Furthermore add a merge-hash routine asking for a 2nd Hash merging directly into $!config returning the result.
 * 0.4.0
   * Possibility to offer a config Hash when instantiating. :merge is turned on.
 * 0.3.5
