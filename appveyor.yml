@@ -15,7 +15,8 @@ install:
   - msiexec /i rakudo.msi /quiet /qn /norestart /log install.log
   - SET PATH=C:\rakudo\bin;C:\rakudo\share\perl6\site\bin;%PATH%
   - panda update
-  - panda installdeps .
+#  - panda installdeps .
+  - panda --notests install JSON::Fast
   - panda --notests install Config::TOML
 
 build: off
