@@ -16,7 +16,7 @@ install:
   - SET PATH=C:\rakudo\bin;C:\rakudo\share\perl6\site\bin;%PATH%
   - panda update
   - panda installdeps .
-  - panda --notests Config::TOML
+  - panda --notests install Config::TOML
 
 build: off
 
