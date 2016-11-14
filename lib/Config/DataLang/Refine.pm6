@@ -7,11 +7,9 @@ has Str $!config-name;
 has Hash $.config;
 has Array $!config-names = [];
 
-subset StrMode of Int where 10 <= $_ <= 13;
-constant C-URI-OPTS-T1          is export = 10;
-constant C-URI-OPTS-T2          is export = 11;
-constant C-UNIX-OPTS-T1         is export = 12;
-constant C-UNIX-OPTS-T2         is export = 13;
+enum StrMode is export <
+  C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2
+>;
 
 #-------------------------------------------------------------------------------
 submethod BUILD (
@@ -53,6 +51,7 @@ submethod BUILD (
 
   # Read series of config files only once.
   my Str $basename = ($config-name // $*PROGRAM.Str).IO.basename;
+say "bn: $basename";
   if $basename !~~ any(@$!config-names) {
 
     # Save it to prevent rereading
