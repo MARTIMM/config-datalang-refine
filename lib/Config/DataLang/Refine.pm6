@@ -368,8 +368,7 @@ multi method merge-hash ( Hash:D $h1, Hash:D $h2 --> Hash ) {
 #-------------------------------------------------------------------------------
 multi method merge-hash ( Hash:D $h2 --> Hash ) {
 
-  my Hash $h1 := $!config;
-  my Hash $h3 = $h1;
+  my Hash $h3 = $!config;
   for $h2.kv -> $k, $v {
 
     if $v ~~ Hash {
