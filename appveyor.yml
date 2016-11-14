@@ -29,3 +29,6 @@ shallow_clone: true
 
 # set clone depth
 clone_depth: 4
+
+environment:
+  PANDA_SUBMIT_TESTREPORTS: 1

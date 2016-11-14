@@ -94,7 +94,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
             $*HOME.Str ~ "/.$config-name",
             ".$config-name", $config-name -> $cfg-name {
 
-          if $cfg-name.IO ~~ :r {
+          if ?$cfg-name and $cfg-name.IO ~~ :r {
             $config-content = slurp($cfg-name) ~ "\n";
 
             # Parse config file if exists
@@ -122,7 +122,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
                   }, @$locations
              ) -> $cfg-name {
 
-          if $cfg-name.IO ~~ :r {
+          if ?$config-name and $cfg-name.IO ~~ :r {
             $config-content = slurp($cfg-name);
             last;
           }
