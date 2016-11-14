@@ -1,3 +1,13 @@
+## Release notes
+
+See [semantic versioning](http://semver.org/). Please note point 4. on
+that page: ***Major version zero (0.y.z) is for initial development. Anything may
+change at any time. The public API should not be considered stable.***
+
+* 0.4.2
+  * Change use of constants into enums.
+  * Fixed a bug when locations are empty strings or not readable.
+  * Die statements now throw a X::Config::DataLang::Refine exception
 * 0.4.1
   * Make merge-hash available for external use. Furthermore add a merge-hash routine asking for a 2nd Hash merging directly into $!config returning the result.
   * removed use of module File::HomeDir and use $\*HOME instead
