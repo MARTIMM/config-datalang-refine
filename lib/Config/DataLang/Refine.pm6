@@ -120,15 +120,20 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
     my Str $cn = $!config-name;
+say $cn;
     $locs.push: $cn if $cn.IO ~~ :r;
     $cn = ".$cn";
+say $cn;
     $locs.push: $cn if $cn.IO ~~ :r;
     $cn = $*HOME.Str ~ '/' ~ $cn;
+say $cn;
     $locs.push: $cn if $cn.IO ~~ :r;
 
     for @$!locations -> $l {
+say "L: $l";
       if ? $l and $l.IO.r and $l.IO.d {
         my Str $cn = [~] $l.IO.resolve.Str, '/', $!config-name;
+say $cn;
         $locs.push: $cn if $cn.IO ~~ :r;
       }
     }
