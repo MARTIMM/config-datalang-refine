@@ -8,42 +8,59 @@ class X::Config::DataLang::Refine is Exception {
 #-------------------------------------------------------------------------------
 class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
-  has Str $!config-name;
-  has Hash $.config;
+  has Str $!config-name = '';
   has Array $!config-names = [];
+  has Array $!locations = [];
+
+  has Sub $!read-from-text;
+  has Str $!extension;
+
+  has Bool $!merge = False;
+  has Str $!config-content = '';
+  has Hash $.config;
 
   enum StrMode is export <
     C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2
   >;
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   submethod BUILD (
-    Str :$config-name is copy,
-    Bool :$merge is copy = False,
-    Array :$locations is copy = [],
-    Str :$data-module = 'Config::TOML',
-    Hash :$other-config = {}
+    Str :$config-name = '', Bool :$merge = False, Array :$locations = [],
+    Str :$data-module = 'Config::TOML', Hash :$other-config = {}
   ) {
+
+    $!merge = $merge;
+    $!locations = $locations;
 
     # When the caller provides a configuration as a base, set that as a
     # starting point and set merge to True
-    $merge = True if $other-config.elems;
-    $!config = $other-config;
+    $!merge = True if $other-config.elems;
 
     # Import proper routine and select read routine
-    my Sub $read-from-text;
-    my Str $extension;
+    self.init-config-type(:$data-module);
+    $!config = $other-config;
+
+    # Read and deserialize text from file
+    my Str $config-content;
+
+    self.init-config(:$config-name);
+  }
+
+  #-----------------------------------------------------------------------------
+  # Import module and select proper read routine and extension
+  method init-config-type ( Str :$data-module = 'Config::TOML' ) {
+
     given $data-module {
       when 'Config::TOML' {
         require ::($data-module) <&from-toml>;
-        $read-from-text = &from-toml;
-        $extension = '.toml';
+        $!read-from-text = &from-toml;
+        $!extension = '.toml';
       }
 
       when 'JSON::Fast' {
         require ::($data-module) <&from-json>;
-        $read-from-text = &from-json;
-        $extension = '.json';
+        $!read-from-text = &from-json;
+        $!extension = '.json';
       }
 
       default {
@@ -52,95 +69,103 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
         );
       }
     }
+  }
 
-    # Read and deserialize text from file
-    my Str $config-content;
+  #-----------------------------------------------------------------------------
+  method init-config ( Str :$config-name is copy ) {
 
-    # Read series of config files only once.
-    my Str $basename = ($config-name // $*PROGRAM.Str).IO.basename;
+    my Str $basename = (
+      ?$config-name ?? $config-name !! $*PROGRAM.Str
+    ).IO.basename;
+
+    # Check if basename is seen before
     if $basename !~~ any(@$!config-names) {
 
-      # Save it to prevent rereading
-      $!config-names.push($basename);
+      # Do we have a name
+      if ? $config-name {
 
-      # Check name
-      if $config-name.defined {
-
-        # Check if name holds complete path, relative or absolute
+        # Check if name holds a path, relative or absolute
         if $config-name ~~ m/<[/]>+/ {
+
+          # Separate basename from path and add path to locations
           my Str $p = $config-name.IO.resolve.Str;
-          $p ~~ s/<[/]>? $basename $//;
-          $locations.push($p);
+          $p ~~ s/ '/' $basename $//;
+          $!locations.push($p);
           $config-name = $basename;
         }
       }
 
-      # If user didn't define a name, derive it from the program name
+      # If user didn't define a name, derive it from the program name already
+      # set in basename
       else {
+        
+        # Remove extension of program, if any, and add config extension
         $config-name = $basename;
         my Str $ext = $basename.IO.extension;
-        $config-name ~~ s/\.$ext// if $ext.defined;
-        $config-name ~= $extension;
+        $config-name ~~ s/\.$ext// if ?$ext;
+        $config-name ~= $!extension;
       }
 
-      if $merge {
+      $!config-name = $config-name;
 
-        $config-content = '';
-        for |(map { ?$_ and .IO.r 
-                    ?? ([~] .IO.resolve.Str, '/', $config-name)
-                    !! ''
-                  }, @$locations.reverse
-             ),
-            $*HOME.Str ~ "/.$config-name",
-            ".$config-name", $config-name -> $cfg-name {
-
-          if ?$cfg-name and $cfg-name.IO ~~ :r {
-            $config-content = slurp($cfg-name) ~ "\n";
-
-            # Parse config file if exists
-            $!config = self.merge-hash(
-              $!config,
-              $read-from-text($config-content)
-            );
-          }
-        }
-
-        unless $!config.elems {
-          die X::Config::DataLang::Refine.new(
-            :message("Config files derived from $config-name not found or empty in current directory (plain or hidden) or in home directory")
-          );
-        }
-      }
-
-      else {
-
-        for $config-name, ".$config-name",
-            $*HOME ~ "/.$config-name",
-            |(map { ?$_ and .IO.r
-                    ?? ([~] .IO.resolve.Str, '/', $config-name)
-                    !! ''
-                  }, @$locations
-             ) -> $cfg-name {
-
-          if ?$config-name and $cfg-name.IO ~~ :r {
-            $config-content = slurp($cfg-name);
-            last;
-          }
-        }
-
-        unless ?$config-content {
-          die X::Config::DataLang::Refine.new(
-            :message("Config file $config-name not found in current directory (plain or hidden) or in home directory")
-          );
-        }
-
-        # Parse config file if exists
-        $!config = $read-from-text($config-content);
-      }
+      self.read-config;
     }
   }
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  method read-config ( ) {
+
+    $!config-content = '';
+
+    # Get all locations and push the path when config is found and readable
+    my Array $locs = [];
+    my Str $cn = $!config-name;
+    $locs.push: $cn if $cn.IO ~~ :r;
+    $cn = ".$cn";
+    $locs.push: $cn if $cn.IO ~~ :r;
+    $cn = $*HOME.Str ~ '/' ~ $cn;
+    $locs.push: $cn if $cn.IO ~~ :r;
+
+    for @$!locations -> $l {
+      if ? $l and $l.IO.r and $l.IO.d {
+        my Str $cn = [~] $l.IO.resolve.Str, '/', $!config-name;
+        $locs.push: $cn if $cn.IO ~~ :r;
+      }
+    }
+
+    # merge all content
+    if $!merge {
+
+      # Start with the last entry from the locations
+      for @$locs.reverse -> $cfg-name {
+
+        $!config-content = slurp($cfg-name) ~ "\n";
+
+        # Parse config file if exists
+        $!config = self.merge-hash(
+          $!config,
+          $!read-from-text($!config-content)
+        );
+      }
+    }
+
+    # no merge, pick first config we find
+    else {
+
+      if ?$locs[0] {
+        $!config-content = slurp($locs[0]);
+        $!config = $!read-from-text($!config-content);
+      }
+    }
+
+    unless $!config.elems {
+      die X::Config::DataLang::Refine.new(
+        :message("Config files derived from $!config-name not found or empty in current directory (plain or hidden) or in home directory")
+      );
+    }
+  }
+
+  #-----------------------------------------------------------------------------
   method refine ( *@key-list, Bool :$filter = False --> Hash ) {
 
     my Hash $refined-list = {};
@@ -164,7 +189,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $refined-list;
   }
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method refine-str (
     *@key-list,
     Str :$glue = ',',
@@ -315,7 +340,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $refined-list;
   }
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method !encode-uri-t2 ( Str $entry --> Str ) {
 
     my Str $new-entry = '';
@@ -363,7 +388,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $new-entry;
   }
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   multi method merge-hash ( Hash:D $h1, Hash:D $h2 --> Hash ) {
 
     my Hash $h3 = $h1;
@@ -383,7 +408,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $h3 // {};
   }
 
-  #-------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   multi method merge-hash ( Hash:D $h2 --> Hash ) {
 
     my Hash $h3 = $!config;

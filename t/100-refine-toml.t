@@ -67,7 +67,7 @@ subtest {
 
     CATCH {
       when X::Config::DataLang::Refine {
-        like .message, / :s Config file .* not found/, .message;
+        like .message, / :s Config files derived from .* not found/, .message;
       }
     }
   }

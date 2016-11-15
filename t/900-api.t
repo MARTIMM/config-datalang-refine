@@ -17,7 +17,7 @@ subtest {
   
     CATCH {
       when X::Config::DataLang::Refine {
-        like .message, / :s Config file '900-api.toml' not found /, .message;
+        like .message, / :s Config files derived from '900-api.toml' not found /, .message;
       }
     }
   }
