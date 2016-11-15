@@ -133,6 +133,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       }
     }
 
+say "Locs: $locs";
     # merge all content
     if $!merge {
 
