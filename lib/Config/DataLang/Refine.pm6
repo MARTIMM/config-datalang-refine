@@ -8,7 +8,6 @@ class X::Config::DataLang::Refine is Exception {
 #-------------------------------------------------------------------------------
 class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
-  has Str $!config-name = '';
   has Array $!config-names = [];
   has Array $!locations = [];
 
@@ -106,20 +105,20 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
         $config-name ~= $!extension;
       }
 
-      $!config-name = $config-name;
+      $!config-names.push: $config-name;
 
-      self.read-config;
+      self.read-config($config-name);
     }
   }
 
   #-----------------------------------------------------------------------------
-  method read-config ( ) {
+  method read-config ( Str $config-name ) {
 
     $!config-content = '';
 
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
-    my Str $cn = $!config-name;
+    my Str $cn = $config-name;
     $locs.push: $cn if $cn.IO ~~ :r;
     $cn = ".$cn";
     $locs.push: $cn if $cn.IO ~~ :r;
@@ -127,10 +126,11 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $locs.push: $cn if $cn.IO ~~ :r;
 
     for @$!locations -> $l {
-      # perl6 bug on windows?
-      $l ~~ s/^ '\' (<[CD]> ':') /$0/;
+#TODO perl6 bug on windows?
+$l ~~ s/^ \\ (<[CDE]> ':') /$0/;
       if ? $l and $l.IO.r and $l.IO.d {
-        my Str $cn = [~] $l.IO.resolve.Str, '/', $!config-name;
+        my Str $cn = [~] $l.IO.resolve.Str, '/', $config-name;
+$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
         $locs.push: $cn if $cn.IO ~~ :r;
       }
     }
@@ -162,7 +162,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
     unless $!config.elems {
       die X::Config::DataLang::Refine.new(
-        :message("Config files derived from $!config-name not found or empty in current directory (plain or hidden) or in home directory")
+        :message("Config files derived from $config-name not found or empty in current directory (plain or hidden) or in home directory")
       );
     }
   }
