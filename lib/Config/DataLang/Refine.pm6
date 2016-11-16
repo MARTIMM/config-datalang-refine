@@ -126,7 +126,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $locs.push: $cn if $cn.IO ~~ :r;
 
     for @$!locations -> $l is rw {
-#TODO perl6 bug on windows?
+#TODO perl6 bug on windows?, $l must now be mutable!
 $l ~~ s/^ \\ (<[CDE]> ':') /$0/;
       if ? $l and $l.IO.r and $l.IO.d {
         my Str $cn = [~] $l.IO.resolve.Str, '/', $config-name;
