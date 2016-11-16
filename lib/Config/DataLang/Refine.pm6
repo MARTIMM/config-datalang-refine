@@ -88,7 +88,9 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
           # Separate basename from path and add path to locations
           my Str $p = $config-name.IO.resolve.Str;
-          $p ~~ s/ '/' $basename $//;
+          $p ~~ s/ ('/'|\\) $basename $//;
+say "Path: $p";
+say "Base: $basename";
           $!locations.push($p);
           $config-name = $basename;
         }
@@ -107,6 +109,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
       $!config-names.push: $config-name;
 
+say "cfgn: $config-name";
       self.read-config($config-name);
     }
   }
@@ -118,11 +121,19 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
-    my Str $cn = $config-name;
+    my Str $cn = $config-name.IO.resolve.Str;
+$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
-    $cn = ".$cn";
+
+    $cn = ".$config-name".IO.resolve.Str;
+$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
-    $cn = $*HOME.Str ~ '/' ~ $cn;
+
+    $cn = ($*HOME.Str ~ '/' ~ $config-name).IO.resolve.Str;
+$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
 
     for @$!locations -> $l is rw {
