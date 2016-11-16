@@ -128,9 +128,11 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     for @$!locations -> $l is rw {
 #TODO perl6 bug on windows?, $l must now be mutable!
 $l ~~ s/^ \\ (<[CDE]> ':') /$0/;
+say "L: $l";
       if ? $l and $l.IO.r and $l.IO.d {
         my Str $cn = [~] $l.IO.resolve.Str, '/', $config-name;
 $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+say "C: $cn";
         $locs.push: $cn if $cn.IO ~~ :r;
       }
     }
@@ -140,6 +142,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 
       # Start with the last entry from the locations
       for @$locs.reverse -> $cfg-name {
+say "CN: $cfg-name";
 
         $!config-content = slurp($cfg-name) ~ "\n";
 
@@ -148,6 +151,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
           $!config,
           $!read-from-text($!config-content)
         );
+say "CFG: $!config.elems()";
       }
     }
 
@@ -155,6 +159,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
     else {
 
       if ?$locs[0] {
+say "l0: $locs[0]";
         $!config-content = slurp($locs[0]);
         $!config = $!read-from-text($!config-content);
       }
