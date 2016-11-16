@@ -125,7 +125,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
     $cn = $*HOME.Str ~ '/' ~ $cn;
     $locs.push: $cn if $cn.IO ~~ :r;
 
-    for @$!locations -> $l {
+    for @$!locations -> $l is rw {
 #TODO perl6 bug on windows?
 $l ~~ s/^ \\ (<[CDE]> ':') /$0/;
       if ? $l and $l.IO.r and $l.IO.d {
