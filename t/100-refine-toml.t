@@ -66,8 +66,8 @@ subtest {
     my Config::DataLang::Refine $c .= new;
 
     CATCH {
-      default {
-        like .message, / :s Config file .* not found/, .message;
+      when X::Config::DataLang::Refine {
+        like .message, / :s Config files derived from .* not found/, .message;
       }
     }
   }
