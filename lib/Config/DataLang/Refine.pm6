@@ -87,8 +87,10 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
         if $config-name ~~ m/<[/]>+/ {
 
           # Separate basename from path and add path to locations
-          my Str $p = $config-name.IO.resolve.Str;
-          $p ~~ s/ '/' $basename $//;
+          my Str $p = $config-name.IO.abspath;
+          $p ~~ s/ ('/'|\\) $basename $//;
+#say "Path: $p";
+#say "Base: $basename";
           $!locations.push($p);
           $config-name = $basename;
         }
@@ -107,6 +109,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
       $!config-names.push: $config-name;
 
+#say "cfgn: $config-name";
       self.read-config($config-name);
     }
   }
@@ -118,19 +121,29 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
-    my Str $cn = $config-name;
-    $locs.push: $cn if $cn.IO ~~ :r;
-    $cn = ".$cn";
-    $locs.push: $cn if $cn.IO ~~ :r;
-    $cn = $*HOME.Str ~ '/' ~ $cn;
+    my Str $cn = $config-name.IO.abspath;
+#$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
 
-    for @$!locations -> $l is rw {
+    $cn = ".$config-name".IO.abspath;
+#$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#say "cn: $cn, ", $cn.IO ~~ :r;
+    $locs.push: $cn if $cn.IO ~~ :r;
+
+    $cn = ($*HOME.Str ~ '/' ~ $config-name).IO.abspath;
+#$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#say "cn: $cn, ", $cn.IO ~~ :r;
+    $locs.push: $cn if $cn.IO ~~ :r;
+
+    for @$!locations -> $l {
 #TODO perl6 bug on windows?, $l must now be mutable!
-$l ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#$l ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#say "L: $l";
       if ? $l and $l.IO.r and $l.IO.d {
-        my Str $cn = [~] $l.IO.resolve.Str, '/', $config-name;
-$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+        my Str $cn = [~] $l.IO.abspath, '/', $config-name;
+#$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
+#say "C: $cn";
         $locs.push: $cn if $cn.IO ~~ :r;
       }
     }
@@ -140,6 +153,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 
       # Start with the last entry from the locations
       for @$locs.reverse -> $cfg-name {
+#say "CN: $cfg-name";
 
         $!config-content = slurp($cfg-name) ~ "\n";
 
@@ -148,6 +162,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
           $!config,
           $!read-from-text($!config-content)
         );
+#say "CFG: $!config.elems()";
       }
     }
 
@@ -155,6 +170,7 @@ $cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
     else {
 
       if ?$locs[0] {
+#say "l0: $locs[0]";
         $!config-content = slurp($locs[0]);
         $!config = $!read-from-text($!config-content);
       }
