@@ -261,7 +261,7 @@ string used to join elements of an array, this is a ',' by default.
   Bool          k=True          k=True
                 k=False         <removed>
   Array         k=1,2,3         k=1,2,3
-  special text  k='v'           k='v'
+  spaced text   k='v'           k='v'
   Any           k=v             k=v
 
 Simple results
@@ -284,10 +284,17 @@ together with a '&' character. All strings will be encoded for the first
   Bool          --k             --k
                 --nok           <removed>
   Array         --k=1,2,3       --k=1,2,3
+  text with '`' --k=v           --k=v
   spaced text   --k='v'         --k='v'
   Any           --k=v           --k=v
 
-All single letter keys get only one dash on front like -k or -k=v. The
+B<Note 1>: The values are also checked for backticks(`) because in Unix these can
+hold other commands. However, a command can contain spaces which will then be
+quoted. To prevent that the value is checked for an even number of backticks.
+When there are spaces in the value outside these backticks the user must add the
+quotes manually if necessary.
+
+B<Note 2>: All single letter keys get only one dash on front like -k or -k=v. The
 mode C-UNIX-OPTS-T2 does the same but gathers all single character keys without
 values together prefixed with a dash. E.g. --key, -l, -m, -t=1 becomes --key,
 -lm, -t=1

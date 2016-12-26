@@ -24,8 +24,8 @@ build: off
 
 test_script:
 #  - prove -v --merge --exec "perl6 -Ilib" xt/wpath.t
-  - prove -v --merge --exec "perl6 -Ilib" t/
 #  - prove -v --merge --exec "perl6 -Ilib" t/300-refine-locations.t
+  - prove -v --merge --exec "perl6 -Ilib" t/
 
 # fetch repository as zip archive
 shallow_clone: true

@@ -288,6 +288,13 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
             }
           }
 
+          # Check for backticks(`), in Unix these can hold other commands. The line
+          # is checked for an even number of backticks. When there are spaces in
+          # the line the user must add the quoting to the line if necessary.
+          when not ?((m:g/ '`'/).elems +& 0x01) {
+            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "$v";
+          }
+
           when /\s/ {
             $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "'$v'";
           }
@@ -307,7 +314,6 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       for $o.kv -> $k, $v {
 
         $entry = '';
-
         given $v {
           # should not happen
           when Hash {
@@ -338,6 +344,10 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
                 $entry = "--no$k";
               }
             }
+          }
+
+          when not ?((m:g/ '`'/).elems +& 0x01) {
+            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "$v";
           }
 
           when /\s/ {
