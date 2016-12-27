@@ -6,6 +6,7 @@ change at any time. The public API should not be considered stable.***
 
 * 0.4.7
   * Bugfix, spaced text not quoted. Caused by backtick test where 0 ticks was an even number of ticks. Added test to see if there are any first.
+  * Added tests for backticks.
 * 0.4.6
   * Added check for even number of backticks to prevent quoting in the unix type processing C-UNIX-OPTS-T1 and C-UNIX-OPTS-T2. Spaces outside backticks must be quoted manually.
 * 0.4.5

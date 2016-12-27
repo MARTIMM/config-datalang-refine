@@ -64,7 +64,9 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
     },
 
     "p3": {
-      "name": "key=a string! &@data"
+      "name": "key=a string! &@data",
+      "command": "\"touch \"`date +%Y`.log",
+      "c3tick": "\"`touch \"`date +%Y`.log"
     }
   }
 
@@ -208,6 +210,10 @@ subtest {
   $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
 #say dump $o;
   ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text: spaced text';
+
+  $o = $c.refine-str( <p3>, :str-mode(C-UNIX-OPTS-T1));
+  ok '--command="touch "`date +%Y`.log' ~~ any(@$o), 'p3 --command: backtick text';
+  ok '--c3tick=\'"`touch "`date +%Y`.log\'' ~~ any(@$o), 'p3 --c3tick: backtick text';
 
   $o = $c.refine-str( <p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
 #say $o.perl;
