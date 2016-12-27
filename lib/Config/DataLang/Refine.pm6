@@ -19,7 +19,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
   has Hash $.config;
 
   enum StrMode is export <
-    C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2
+    C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2 C-UNIX-OPTS-T3
   >;
 
   #-----------------------------------------------------------------------------
@@ -211,10 +211,13 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
   method refine-str (
     *@key-list,
     Str :$glue = ',',
-    Bool :$filter = False,
+    Bool :$filter is copy = False,
     StrMode :$str-mode = C-URI-OPTS-T1
     --> Array
   ) {
+
+    # turn off filter when C-URI-OPTS-T3 is used but filter was turned on
+    $filter = False if $str-mode == C-UNIX-OPTS-T3;
 
     my Str $entry;
     my Array $refined-list = [];
@@ -252,7 +255,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       }
     }
 
-    elsif $str-mode ~~ any(C-UNIX-OPTS-T1|C-UNIX-OPTS-T2) {
+    elsif $str-mode ~~ any(C-UNIX-OPTS-T1|C-UNIX-OPTS-T2|C-UNIX-OPTS-T3) {
 
       my Str $T2-entry = '-';
 
@@ -279,10 +282,17 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
                 elsif $str-mode == C-UNIX-OPTS-T2 {
                   $T2-entry ~= "$k";
                 }
+
+                elsif $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "-$k";
+                }
               }
 
               else {
                 $entry = "--no$k";
+                if $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "--/$k";
+                }
               }
             }
 
@@ -293,6 +303,9 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
               else {
                 $entry = "--no$k";
+                if $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "--/$k";
+                }
               }
             }
           }
