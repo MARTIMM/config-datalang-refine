@@ -85,3 +85,4 @@ The **Config::DataLang::Refine** class adds facilities to use a configuration fi
 Look for documentation and other information at
 * [Config::DataLang::Refine](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/Refine.pdf)
 * [Release notes](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/CHANGES.md)
+* [Todo and Bugs](https://github.com/MARTIMM/config-datalang-refine/blob/master/doc/TODO.md)
