@@ -99,7 +99,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       # If user didn't define a name, derive it from the program name already
       # set in basename
       else {
-        
+
         # Remove extension of program, if any, and add config extension
         $config-name = $basename;
         my Str $ext = $basename.IO.extension;
@@ -252,10 +252,13 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       }
     }
 
-    elsif $str-mode == C-UNIX-OPTS-T1 {
+    elsif $str-mode ~~ any(C-UNIX-OPTS-T1|C-UNIX-OPTS-T2) {
+
+      my Str $T2-entry = '-';
 
       for $o.kv -> $k, $v {
 
+        $entry = '';
         given $v {
           # should not happen
           when Hash {
@@ -269,7 +272,13 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
           when Bool {
             if $k.chars == 1 {
               if ?$v {
-                $entry = "-$k";
+                if $str-mode == C-UNIX-OPTS-T1 {
+                  $entry = "-$k";
+                }
+
+                elsif $str-mode == C-UNIX-OPTS-T2 {
+                  $T2-entry ~= "$k";
+                }
               }
 
               else {
@@ -304,65 +313,11 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
           }
         }
 
-        $refined-list.push: $entry;
-      }
-    }
-
-    elsif $str-mode == C-UNIX-OPTS-T2 {
-      my Str $T2-entry = '-';
-
-      for $o.kv -> $k, $v {
-
-        $entry = '';
-        given $v {
-          # should not happen
-          when Hash {
-            next;
-          }
-
-          when Array {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v.join($glue);
-          }
-
-          when Bool {
-            if $k.chars == 1 {
-              if ?$v {
-                $T2-entry ~= "$k";
-              }
-
-              else {
-                $entry = "--no$k";
-              }
-            }
-
-            else {
-              if ?$v {
-                $entry = "--$k";
-              }
-
-              else {
-                $entry = "--no$k";
-              }
-            }
-          }
-
-          when m:g/ '`'/ and !((m:g/ '`'/).elems +& 0x01) {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "$v";
-          }
-
-          when /\s/ {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "'$v'";
-          }
-
-          default {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v;
-          }
-        }
-
         $refined-list.push: $entry if ?$entry;
       }
 
-      $refined-list.push: $T2-entry if $T2-entry.chars > 1;
+      $refined-list.push: $T2-entry
+        if $str-mode == C-UNIX-OPTS-T2 and $T2-entry.chars > 1;
     }
 
     $refined-list;

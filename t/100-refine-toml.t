@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ subtest {
   ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text: spaced text';
 
   $o = $c.refine-str( <p3>, :str-mode(C-UNIX-OPTS-T1));
-say dump $o;
+#say dump $o;
   ok '--command="touch "`date +%Y`.log' ~~ any(@$o), 'p3 --command: backtick text';
   ok '--c3tick=\'"`touch "`date +%Y`.log\'' ~~ any(@$o), 'p3 --c3tick: backtick text';
 
