@@ -19,7 +19,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
   has Hash $.config;
 
   enum StrMode is export <
-    C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2
+    C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2 C-UNIX-OPTS-T3
   >;
 
   #-----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       # If user didn't define a name, derive it from the program name already
       # set in basename
       else {
-        
+
         # Remove extension of program, if any, and add config extension
         $config-name = $basename;
         my Str $ext = $basename.IO.extension;
@@ -211,10 +211,13 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
   method refine-str (
     *@key-list,
     Str :$glue = ',',
-    Bool :$filter = False,
+    Bool :$filter is copy = False,
     StrMode :$str-mode = C-URI-OPTS-T1
     --> Array
   ) {
+
+    # turn off filter when C-URI-OPTS-T3 is used but filter was turned on
+    $filter = False if $str-mode == C-UNIX-OPTS-T3;
 
     my Str $entry;
     my Array $refined-list = [];
@@ -252,63 +255,8 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       }
     }
 
-    elsif $str-mode == C-UNIX-OPTS-T1 {
+    elsif $str-mode ~~ any(C-UNIX-OPTS-T1|C-UNIX-OPTS-T2|C-UNIX-OPTS-T3) {
 
-      for $o.kv -> $k, $v {
-
-        given $v {
-          # should not happen
-          when Hash {
-            next;
-          }
-
-          when Array {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v.join($glue);
-          }
-
-          when Bool {
-            if $k.chars == 1 {
-              if ?$v {
-                $entry = "-$k";
-              }
-
-              else {
-                $entry = "--no$k";
-              }
-            }
-
-            else {
-              if ?$v {
-                $entry = "--$k";
-              }
-
-              else {
-                $entry = "--no$k";
-              }
-            }
-          }
-
-          # Check for backticks(`), in Unix these can hold other commands. The line
-          # is checked for an even number of backticks. When there are spaces in
-          # the line the user must add the quoting to the line if necessary.
-          when not ?((m:g/ '`'/).elems +& 0x01) {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "$v";
-          }
-
-          when /\s/ {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "'$v'";
-          }
-
-          default {
-            $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ $v;
-          }
-        }
-
-        $refined-list.push: $entry;
-      }
-    }
-
-    elsif $str-mode == C-UNIX-OPTS-T2 {
       my Str $T2-entry = '-';
 
       for $o.kv -> $k, $v {
@@ -327,11 +275,24 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
           when Bool {
             if $k.chars == 1 {
               if ?$v {
-                $T2-entry ~= "$k";
+                if $str-mode == C-UNIX-OPTS-T1 {
+                  $entry = "-$k";
+                }
+
+                elsif $str-mode == C-UNIX-OPTS-T2 {
+                  $T2-entry ~= "$k";
+                }
+
+                elsif $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "-$k";
+                }
               }
 
               else {
                 $entry = "--no$k";
+                if $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "--/$k";
+                }
               }
             }
 
@@ -342,11 +303,17 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
               else {
                 $entry = "--no$k";
+                if $str-mode == C-UNIX-OPTS-T3 {
+                  $entry = "--/$k";
+                }
               }
             }
           }
 
-          when not ?((m:g/ '`'/).elems +& 0x01) {
+          # Check for backticks(`), in Unix these can hold other commands. The line
+          # is checked for an even number of backticks. When there are spaces in
+          # the line the user must add the quoting to the line if necessary.
+          when m:g/ '`'/ and !((m:g/ '`'/).elems +& 0x01) {
             $entry = ($k.chars == 1 ?? "-$k" !! "--$k=" ) ~ "$v";
           }
 
@@ -362,7 +329,8 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
         $refined-list.push: $entry if ?$entry;
       }
 
-      $refined-list.push: $T2-entry if $T2-entry.chars > 1;
+      $refined-list.push: $T2-entry
+        if $str-mode == C-UNIX-OPTS-T2 and $T2-entry.chars > 1;
     }
 
     $refined-list;

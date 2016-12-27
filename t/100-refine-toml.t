@@ -1,5 +1,6 @@
 use v6.c;
 use Test;
+#use Data::Dump::Tree;
 use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
@@ -57,6 +58,8 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
 
   [p3]
     name        = 'key=a string! &@data'
+    command     = '"touch "`date +%Y`.log'
+    c3tick      = '"`touch "`date +%Y`.log'
   EOOPT
 
 #-------------------------------------------------------------------------------
@@ -196,6 +199,7 @@ subtest {
 subtest {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+#say dump $c.config;
   my Array $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T1));
   ok '--port=2345' ~~ any(@$o), 'app --port in list';
   nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
@@ -214,7 +218,14 @@ subtest {
   ok '--workdir=/var/tmp' ~~ any(@$o), 'app --workdir /var/tmp  in list';
 
   $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
-  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text in list';
+  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text: spaced text';
+
+  $o = $c.refine-str( <p3>, :str-mode(C-UNIX-OPTS-T1));
+#say dump $o;
+  ok '--command="touch "`date +%Y`.log' ~~ any(@$o),
+     'p3 --command: backtick text';
+  ok '--c3tick=\'"`touch "`date +%Y`.log\'' ~~ any(@$o),
+     'p3 --c3tick: backtick text';
 
   $o = $c.refine-str( <p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
   ok '--workdir=~/p2' ~~ any(@$o), 'p2 --workdir ~/p2 in list';
@@ -235,14 +246,20 @@ subtest {
   ok '-pq' ~~ any(@$o), 'app -pq in list';
   ok '--notest' ~~ any(@$o), 'app -notest in list';
 
-
   $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T2));
   ok '--port=2345' ~~ any(@$o), 'app --port in list';
   nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
   nok '-p' ~~ any(@$o), 'app -p not in list';
   nok '-q' ~~ any(@$o), 'app -q not in list';
   ok '-pq' ~~ any(@$o), 'app -pq in list';
-}, 'refine filter string array tests C-UNIX-OPTS-T2';
+
+  $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T3));
+#say dump $o;
+  ok "--/test" ~~ any(@$o),
+     'p2 --/test: negated perl6 option, filter ignored';
+  ok "--/tunnel" ~~ any(@$o),
+     'p2 --/tunnel: negated perl6 option, filter ignored';
+}, 'refine filter string array tests C-UNIX-OPTS-T2 and T3';
 
 #-------------------------------------------------------------------------------
 # Cleanup
