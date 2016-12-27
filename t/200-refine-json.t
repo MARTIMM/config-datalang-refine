@@ -1,5 +1,6 @@
 use v6.c;
 use Test;
+#use Data::Dump::Tree;
 use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
@@ -205,7 +206,8 @@ subtest {
   ok '--workdir=/var/tmp' ~~ any(@$o), 'app --workdir /var/tmp  in list';
 
   $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
-  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text in list';
+#say dump $o;
+  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text: spaced text';
 
   $o = $c.refine-str( <p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
 #say $o.perl;

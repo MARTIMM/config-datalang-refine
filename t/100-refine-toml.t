@@ -1,5 +1,6 @@
 use v6.c;
 use Test;
+#use Data::Dump::Tree;
 use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
@@ -196,6 +197,7 @@ subtest {
 subtest {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
+#say dump $c;
   my Array $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T1));
   ok '--port=2345' ~~ any(@$o), 'app --port in list';
   nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
@@ -214,7 +216,8 @@ subtest {
   ok '--workdir=/var/tmp' ~~ any(@$o), 'app --workdir /var/tmp  in list';
 
   $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
-  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text in list';
+#say dump $o;
+  ok "--text='abc def xyz'" ~~ any(@$o), 'p2 --text: spaced text';
 
   $o = $c.refine-str( <p2>, :filter, :str-mode(C-UNIX-OPTS-T1));
   ok '--workdir=~/p2' ~~ any(@$o), 'p2 --workdir ~/p2 in list';
