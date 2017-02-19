@@ -10,7 +10,7 @@ perl6:
 install:
   - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
   - zef update
-  - zef--depsonly install .
+  - zef --depsonly install .
 
 cache:
   directories:
