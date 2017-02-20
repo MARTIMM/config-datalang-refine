@@ -204,7 +204,8 @@ Then it descends in the config using the second key. This goes on until the last
 key is used. The process stops when a key does not exist on some level.
 
 A simple filter is used on the results if C<:filter> is set. All key/value pairs
-are removed from the result where the value is a C<Bool> and is C<False>.
+are removed from the result where the value is a C<Bool> and is C<False> or any
+value that is undefined.
 
 =begin table
 

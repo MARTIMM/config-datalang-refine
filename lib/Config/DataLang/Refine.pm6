@@ -216,7 +216,8 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
         # Looks like too much but it isn't. It must be able to remove
         # previously set entries.
-        $refined-list{$k}:delete if $filter and $s{$k} ~~ Bool and !$s{$k};
+        $refined-list{$k}:delete
+          if $filter and ( $s{$k} ~~ Bool and !$s{$k} or not $s{$k}.defined );
       }
     }
 
