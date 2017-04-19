@@ -171,16 +171,12 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
 
         $!config-content = slurp($cfg-name) ~ "\n";
 
-        # Parse config file if exists
-        my $func = '&' ~ $!read-from-text;
-
-        # Need to require again because symbols are only known at the current
+        # Parse config file if exists, Need to require again because symbols are only known at the current
         # code block
-        require ::($!data-module);
-        $!config = self.merge-hash(
-          $!config,
-          $!read-from-text($!config-content)
-        );
+        (try require ::($!data-module)) === Nil
+             and say "Failed to load $!data-module;\n$!";
+
+        $!config = self.merge-hash( $!config, &$!read-from-text($!config-content));
       }
     }
 
@@ -196,8 +192,9 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
         }
 
         $!config-content = slurp($locs[0]);
-        require ::($!data-module);
-        $!config = $!read-from-text($!config-content);
+        (try require ::($!data-module)) === Nil
+             and say "Failed to load $!data-module;\n$!";
+        $!config = &$!read-from-text($!config-content);
       }
     }
 
