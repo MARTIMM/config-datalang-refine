@@ -4,7 +4,7 @@
     "Config::TOML",
     "JSON::Fast"
   ],
-  "tags": [ "config"]
+  "tags": [ "config"],
   "description": "Refinements on use of configurations loaded with parsers such as found in Config::TOML",
   "license": "The Artistic License 2.0",
   "name": "Config::DataLang::Refine",
