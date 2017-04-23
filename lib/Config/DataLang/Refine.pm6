@@ -23,6 +23,7 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
   has Int $!p-lvl;
 
   has Bool $!trace = False;
+  has Bool $!die-on-empty = True;
 
   enum StrMode is export <
     C-URI-OPTS-T1 C-URI-OPTS-T2 C-UNIX-OPTS-T1 C-UNIX-OPTS-T2 C-UNIX-OPTS-T3
@@ -32,7 +33,7 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
   submethod BUILD (
     Str :$config-name = '', Bool :$!merge = False, Array :$!locations = [],
     Str :$!data-module = 'Config::TOML', Hash :$other-config = {},
-    Bool :$!trace = False
+    Bool :$!trace = False, Bool :$!die-on-empty = True
   ) {
 
     # When the caller provides a configuration as a base, set that as a
@@ -216,7 +217,7 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
       }
     }
 
-    unless $!config.elems {
+    if ! $!config and $!die-on-empty {
       die X::Config::DataLang::Refine.new(
         :message("Config files derived from $config-name not found or empty in current directory (plain or hidden) or in home directory")
       );
