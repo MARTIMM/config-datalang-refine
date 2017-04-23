@@ -115,7 +115,7 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
 
       $!config-names.push: $config-name;
 
-#say "cfgn: $config-name";
+#say "Read config: $config-name";
       self!read-config($config-name);
     }
   }
@@ -129,21 +129,26 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
 
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
+
+    # visible file in current directory
     my Str $cn = $config-name.IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
-#say "cn: $cn, ", $cn.IO ~~ :r;
-    $locs.push: $cn if $cn.IO ~~ :r;
+#say "cd: $cn, ", $cn.IO ~~ :r and $cn.IO ~~ :f;
+    $locs.push: $cn if $cn.IO ~~ :r and $cn.IO ~~ :f;
 
+    # hidden file in current directory
     $cn = ".$config-name".IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
-#say "cn: $cn, ", $cn.IO ~~ :r;
-    $locs.push: $cn if $cn.IO ~~ :r;
+#say ".cd: $cn, ", $cn.IO ~~ :r and $cn.IO ~~ :f;
+    $locs.push: $cn if $cn.IO ~~ :r and $cn.IO ~~ :f;
 
-    $cn = ($*HOME.Str ~ '/' ~ $config-name).IO.absolute;
+    # hidden file in home directory
+    $cn = ($*HOME.Str ~ '/.' ~ $config-name).IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
-#say "cn: $cn, ", $cn.IO ~~ :r;
-    $locs.push: $cn if $cn.IO ~~ :r;
+#say ".h: $cn, ", $cn.IO ~~ :r and $cn.IO ~~ :f;
+    $locs.push: $cn if $cn.IO ~~ :r and $cn.IO ~~ :f;
 
+    # process the paths from the locations array
     for @$!locations -> $l {
 #TODO perl6 bug on windows?, $l must now be mutable!
 #$l ~~ s/^ \\ (<[CDE]> ':') /$0/;
@@ -151,10 +156,23 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
       if ? $l and $l.IO.r and $l.IO.d {
         my Str $cn = [~] $l.IO.absolute, '/', $config-name;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
-#say "C: $cn";
-        $locs.push: $cn if $cn.IO ~~ :r;
+#say "C: $cn, ", $cn.IO ~~ :r and $cn.IO ~~ :f;
+        $locs.push: $cn if $cn.IO ~~ :r and $cn.IO ~~ :f;
       }
     }
+
+#`{{ This cannot be done to look up resources for other modules. Stupid to
+     have thought that. Now leave the comment in to prevent a later thought
+
+    # resources location
+    $cn = '';
+    if ?%?RESOURCES and %?RESOURCES{$config-name} {
+      $cn = %?RESOURCES{$config-name}.Str;
+    }
+    if ? $cn and $cn.IO ~~ :r and $cn.IO ~~ :f {
+      $locs.push: $cn;
+    }
+}}
 
     # merge all content
     if $!merge {
