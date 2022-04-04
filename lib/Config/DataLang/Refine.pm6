@@ -1,5 +1,8 @@
 use v6;
 
+use JSON::Fast;
+use Config::TOML;
+
 #-------------------------------------------------------------------------------
 class X::Config::DataLang::Refine is Exception {
   has Str $.message;
@@ -56,15 +59,15 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
 
     given $!data-module {
       when 'Config::TOML' {
-        (try require ::($!data-module) <&from-toml>) === Nil
-             and say "Failed to load $!data-module;\n$!";
+#        (try require ::($!data-module) <&from-toml>) === Nil
+#             and say "Failed to load $!data-module;\n$!";
         $!read-from-text = &from-toml;
         $!extension = '.toml';
       }
 
       when 'JSON::Fast' {
-        (try require ::($!data-module) <&from-json>) === Nil
-             and say "Failed to load $!data-module;\n$!";
+#        (try require ::($!data-module) <&from-json>) === Nil
+#             and say "Failed to load $!data-module;\n$!";
         $!read-from-text = &from-json;
         $!extension = '.json';
       }

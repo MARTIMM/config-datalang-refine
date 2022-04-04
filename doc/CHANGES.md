@@ -3,6 +3,9 @@
 See [semantic versioning](http://semver.org/). Please note point 4. on
 that page: ***Major version zero (0.y.z) is for initial development. Anything may change at any time. The public API should not be considered stable.***
 
+* 0.7.4
+  * Testing showed that there was again some trouble using require. Removed that and loaded the modules Config::TOML and JSON::Fast explicitly.
+
 * 0.7.3
   * Bug fixed in test routines by Aleks Daniel Jakimenko-Aleksejev. Newest version of Perl6 is randomizing Hash keys to prevent DoS attacks. See also article at https://cry.nu/perl6/secure-hashing-for-moarvm/.
 * 0.7.2
