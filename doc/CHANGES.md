@@ -5,7 +5,6 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
 
 * 0.7.5
   * File extensions are renamed.
-
 * 0.7.4
   * Testing showed that there was again some trouble using require. Removed that and loaded the modules Config::TOML and JSON::Fast explicitly.
 * 0.7.3
