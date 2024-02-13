@@ -8,7 +8,7 @@
   "tags": [ "config"],
 
   "provides": {
-    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6"
+    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.rakumod"
   },
 
   "depends": [
