@@ -1,4 +1,4 @@
-use v6;
+use v6.d;
 
 use JSON::Fast;
 use Config::TOML;
@@ -68,6 +68,7 @@ class Config::DataLang::Refine:auth<github:MARTIMM> {
       when 'JSON::Fast' {
 #        (try require ::($!data-module) <&from-json>) === Nil
 #             and say "Failed to load $!data-module;\n$!";
+#        require ::($data-module);
         $!read-from-text = &from-json;
         $!extension = '.json';
       }

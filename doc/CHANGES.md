@@ -8,7 +8,7 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
 * 0.7.4
   * Testing showed that there was again some trouble using require. Removed that and loaded the modules Config::TOML and JSON::Fast explicitly.
 * 0.7.3
-  * Bug fixed in test routines by Aleks Daniel Jakimenko-Aleksejev. Newest version of Perl6 is randomizing Hash keys to prevent DoS attacks. See also article at https://cry.nu/perl6/secure-hashing-for-moarvm/.
+  * Bug fixed in test routines by Aleks Daniel Jakimenko-Aleksejev. Newest version of Perl6 is randomizing Hash keys to prevent DoS attacks.
 * 0.7.2
   * Load and use config module problems on travis
   * Bugfix stepping in a table(Hash) when it isn't
@@ -25,6 +25,13 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
 * 0.6.0
   * Added a perl method to show the current data structure in a pretty print format. A Hash can be provided to show that instead. Nice to see the results of a refine call.
   * Added a :trace argument to BUILD (new). When True, the files loaded are shown. This comes in handy when the search for files gets complex. Also good to see when there are any unexpected files are found and read into the configuration.
+
+* 2024-02-14 0.5.1
+  * Fix raku filename extensions.
+  * Fix deprecated raku methods like abspath
+  * Fix some tests
+  * Fix meta file
+
 * 0.5.0
   * Added type C-UNIX-OPTS-T3 to handle negated options specially used on perl6 command line when MAIN sub is defined. :filter is ignored in this case because tis filters out false booleans.
 * 0.4.7
