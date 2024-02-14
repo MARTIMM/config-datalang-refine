@@ -5,8 +5,8 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
 change at any time. The public API should not be considered stable.***
 
 * 2024-02-14 0.5.1
-  * Fix for raku filename extensions.
-  * Fix for deprecated raku methods like abspath
+  * Fix raku filename extensions.
+  * Fix deprecated raku methods like abspath
   * Fix some tests
   * Fix meta file
 * 0.5.0
