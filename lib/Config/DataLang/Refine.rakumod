@@ -1,4 +1,5 @@
-use v6.c;
+use v6.d;
+use JSON::Fast;
 
 #-------------------------------------------------------------------------------
 class X::Config::DataLang::Refine is Exception {
@@ -57,7 +58,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
       }
 
       when 'JSON::Fast' {
-        require ::($data-module) <&from-json>;
+#        require ::($data-module);
         $!read-from-text = &from-json;
         $!extension = '.json';
       }
@@ -87,7 +88,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
         if $config-name ~~ m/<[/]>+/ {
 
           # Separate basename from path and add path to locations
-          my Str $p = $config-name.IO.abspath;
+          my Str $p = $config-name.IO.absolute;
           $p ~~ s/ ('/'|\\) $basename $//;
 #say "Path: $p";
 #say "Base: $basename";
@@ -121,17 +122,17 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 
     # Get all locations and push the path when config is found and readable
     my Array $locs = [];
-    my Str $cn = $config-name.IO.abspath;
+    my Str $cn = $config-name.IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 #say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
 
-    $cn = ".$config-name".IO.abspath;
+    $cn = ".$config-name".IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 #say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
 
-    $cn = ($*HOME.Str ~ '/' ~ $config-name).IO.abspath;
+    $cn = ($*HOME.Str ~ '/' ~ $config-name).IO.absolute;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 #say "cn: $cn, ", $cn.IO ~~ :r;
     $locs.push: $cn if $cn.IO ~~ :r;
@@ -141,7 +142,7 @@ class Config::DataLang::Refine:auth<https://github.com/MARTIMM> {
 #$l ~~ s/^ \\ (<[CDE]> ':') /$0/;
 #say "L: $l";
       if ? $l and $l.IO.r and $l.IO.d {
-        my Str $cn = [~] $l.IO.abspath, '/', $config-name;
+        my Str $cn = [~] $l.IO.absolute, '/', $config-name;
 #$cn ~~ s/^ \\ (<[CDE]> ':') /$0/;
 #say "C: $cn";
         $locs.push: $cn if $cn.IO ~~ :r;

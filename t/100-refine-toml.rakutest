@@ -1,11 +1,11 @@
-use v6.c;
+use v6.d;
 use Test;
 #use Data::Dump::Tree;
 use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
 # First config
-spurt( '.myCfg.cfg', Q:to/EOOPT/);
+'.myCfg.cfg'.IO.spurt(Q:to/EOOPT/);
   # App control
   [app]
     workdir     = '/var/tmp'
@@ -31,7 +31,7 @@ spurt( '.myCfg.cfg', Q:to/EOOPT/);
 
 
 # Second config
-spurt( 'myCfg.cfg', Q:to/EOOPT/);
+'myCfg.cfg'.IO.spurt(Q:to/EOOPT/);
   # App control
   [app]
     port        = 2345
@@ -63,7 +63,7 @@ spurt( 'myCfg.cfg', Q:to/EOOPT/);
   EOOPT
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'build test, two config files', {
 
   try {
     my Config::DataLang::Refine $c .= new;
@@ -90,11 +90,10 @@ subtest {
   is-deeply $c.config<p2><times>, [10,11,12], "times p2 $c.config()<p2><times>";
   nok $c.config<app><p2><tunnel>, 'tunnel p2 false';
   ok $c.config<app><p2><vision>, 'vision p2 true';
-
-}, 'build test, two config files';
+};
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'build test, one config Hash and two config files', {
 
   my Hash $other-config = {
     app => {
@@ -117,11 +116,10 @@ subtest {
   is $c.config<app><p3><workdir>, '~/p3', "workdir p3 $c.config()<app><p3><workdir>";
   ok $c.config<app><p3><vision>, "p3 vision True";
   is $c.config<app><p3><env><PATH>[0], '/opt/bin', "Check p3 path = /opt/bin";
-
-}, 'build test, one config Hash and two config files';
+};
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'refine tests', {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
   my Hash $o = $c.refine(<app>);
@@ -141,11 +139,10 @@ subtest {
   $o = $c.refine(<app p1>);
   is $o<host>, 'example.com', "host p1 is $o<host>";
   is $o<port>, 2345, "port p1 $o<port>";
-
-}, 'refine tests';
+};
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'refine filter string array tests C-URI-OPTS-*', {
 
   my Config::DataLang::Refine $c .= new(
     :config-name<myCfg.cfg>,
@@ -156,7 +153,7 @@ subtest {
   ok $o<perl5lib>:!exists, 'no perl5 lib';
   is-deeply $o<perl6lib>, [ 'lib', '.'], "perl6lib $o<perl6lib>";
 
-}, 'refine filter hash tests';
+};
 
 #-------------------------------------------------------------------------------
 subtest {
@@ -193,10 +190,10 @@ subtest {
 #say $o[0];
   ok 'name=key%3Da%20string%21%20%26%40data' ~~ any(@$o), 'p3 encoded text in list';
 
-}, 'refine filter string array tests C-URI-OPTS-*';
+}, ;
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'refine filter string array tests C-UNIX-OPTS-T1', {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
 #say dump $c.config;
@@ -231,35 +228,38 @@ subtest {
   ok '--workdir=~/p2' ~~ any(@$o), 'p2 --workdir ~/p2 in list';
   ok '--times=10,11,12' ~~ any(@$o), 'p2 --times in list';
 
-}, 'refine filter string array tests C-UNIX-OPTS-T1';
+};
 
 #-------------------------------------------------------------------------------
-subtest {
+subtest 'refine filter string array tests C-UNIX-OPTS-T2 and T3', {
 
   my Config::DataLang::Refine $c .= new(:config-name<myCfg.cfg>);
   my Array $o = $c.refine-str( <app>, :str-mode(C-UNIX-OPTS-T2));
-#say $o.perl;
+#dd $o;
   ok '--port=2345' ~~ any(@$o), 'app --port in list';
   nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
   nok '-p' ~~ any(@$o), 'app -p not in list';
   nok '-q' ~~ any(@$o), 'app -q not in list';
-  ok '-pq' ~~ any(@$o), 'app -pq in list';
+
+#say "$?LINE $o.join(', ')";
+  ok ('-pq' ~~ any(@$o) or '-qp' ~~ any(@$o)), 'app -pq in list';
   ok '--notest' ~~ any(@$o), 'app -notest in list';
 
   $o = $c.refine-str( <app>, :filter, :str-mode(C-UNIX-OPTS-T2));
+#dd $o;
   ok '--port=2345' ~~ any(@$o), 'app --port in list';
   nok '--workdir=/tmp' ~~ any(@$o), 'app --workdir /tmp not in list';
   nok '-p' ~~ any(@$o), 'app -p not in list';
   nok '-q' ~~ any(@$o), 'app -q not in list';
-  ok '-pq' ~~ any(@$o), 'app -pq in list';
+  ok ('-pq' ~~ any(@$o) or '-qp' ~~ any(@$o)), 'app -pq in list';
 
   $o = $c.refine-str( <app p2>, :filter, :str-mode(C-UNIX-OPTS-T3));
-#say dump $o;
+#say "$?LINE $o.join(', ')";
   ok "--/test" ~~ any(@$o),
      'p2 --/test: negated perl6 option, filter ignored';
   ok "--/tunnel" ~~ any(@$o),
      'p2 --/tunnel: negated perl6 option, filter ignored';
-}, 'refine filter string array tests C-UNIX-OPTS-T2 and T3';
+};
 
 #-------------------------------------------------------------------------------
 # Cleanup
