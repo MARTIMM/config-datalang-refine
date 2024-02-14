@@ -3,6 +3,13 @@
 See [semantic versioning](http://semver.org/). Please note point 4. on
 that page: ***Major version zero (0.y.z) is for initial development. Anything may change at any time. The public API should not be considered stable.***
 
+* 2024-02-14 0.7.6
+  * Seems a merge failed terribly and several things were different. So this is what is done now. Looking at the log below, several things needed to redoing.
+  * Fix raku filename extensions.
+  * Fix deprecated raku methods like abspath
+  * Fix some tests
+  * Fix meta file
+
 * 0.7.5
   * File extensions are renamed.
 * 0.7.4
@@ -13,7 +20,7 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
   * Load and use config module problems on travis
   * Bugfix stepping in a table(Hash) when it isn't
 * 0.7.1
-  * I definitely did something... :-\
+  * I definitely did something... 😦
 * 0.7.0
   * Added :die-on-empty to new(). Default is True because that was the default behaviour
 * 0.6.2
@@ -25,13 +32,6 @@ that page: ***Major version zero (0.y.z) is for initial development. Anything ma
 * 0.6.0
   * Added a perl method to show the current data structure in a pretty print format. A Hash can be provided to show that instead. Nice to see the results of a refine call.
   * Added a :trace argument to BUILD (new). When True, the files loaded are shown. This comes in handy when the search for files gets complex. Also good to see when there are any unexpected files are found and read into the configuration.
-
-* 2024-02-14 0.5.1
-  * Fix raku filename extensions.
-  * Fix deprecated raku methods like abspath
-  * Fix some tests
-  * Fix meta file
-
 * 0.5.0
   * Added type C-UNIX-OPTS-T3 to handle negated options specially used on perl6 command line when MAIN sub is defined. :filter is ignored in this case because tis filters out false booleans.
 * 0.4.7

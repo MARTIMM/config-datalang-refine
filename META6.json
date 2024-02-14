@@ -1,13 +1,14 @@
 {
   "name": "Config::DataLang::Refine",
   "description": "Refinements on use of configurations loaded with parsers such as found in Config::TOML",
-  "version": "0.5.1",
+  "version": "0.7.6",
   "author": "Marcel Timmerman",
   "authors": [ "Marcel Timmerman"],
   "depends": [
     "Config::TOML",
     "JSON::Fast"
   ],
+  "tag": ["config", "json", "toml"],
   "license": "Artistic-2.0",
   "perl": "6.d",
   "provides": {
