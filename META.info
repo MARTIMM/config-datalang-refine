@@ -1,16 +1,17 @@
 {
-  "authors": "Marcel Timmerman",
+  "name": "Config::DataLang::Refine",
+  "description": "Refinements on use of configurations loaded with parsers such as found in Config::TOML",
+  "version": "0.5.1",
+  "author": "Marcel Timmerman",
+  "authors": [ "Marcel Timmerman"],
   "depends": [
     "Config::TOML",
     "JSON::Fast"
   ],
-  "description": "Refinements on use of configurations loaded with parsers such as found in Config::TOML",
-  "license": "The Artistic License 2.0",
-  "name": "Config::DataLang::Refine",
-  "perl": "6.c",
+  "license": "Artistic-2.0",
+  "perl": "6.d",
   "provides": {
-    "Config::DataLang::Refine":     "lib/Config/DataLang/Refine.pm6"
+    "Config::DataLang::Refine": "lib/Config/DataLang/Refine.rakumod"
   },
-  "source-url": "git://github.com/MARTIMM/config-datalang-refine.git",
-  "version": "0.5.0"
+  "source-url": "git://github.com/MARTIMM/config-datalang-refine.git"
 }
