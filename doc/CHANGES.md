@@ -4,6 +4,11 @@ See [semantic versioning](http://semver.org/). Please note point 4. on
 that page: ***Major version zero (0.y.z) is for initial development. Anything may
 change at any time. The public API should not be considered stable.***
 
+* 2024-02-14 0.5.1
+  * Fix for raku filename extensions.
+  * Fix for deprecated raku methods like abspath
+  * Fix some tests
+  * Fix meta file
 * 0.5.0
   * Added type C-UNIX-OPTS-T3 to handle negated options specially used on perl6 command line when MAIN sub is defined. :filter is ignored in this case because tis filters out false booleans.
 * 0.4.7
